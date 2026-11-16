@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GuardReserveGuru v4</title>
+<title>GuardReserveGuru v5</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#eef1f4;--card:#fff;--ink:#17222e;--mute:#5d6b7a;--line:#d5dce3;--acc:#245a8d;--acc-ink:#fff;--ok:#2b7a50;--warn:#a96a0c;--bad:#b0362b;--okbg:#e2f1e8;--warnbg:#fbefd6;--badbg:#f8e1de;--ftp:#2b7a50;--gtp:#7a4fb0;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -119,14 +119,14 @@ table.mini{min-width:0;width:auto}table.mini th,table.mini td{padding:3px 7px;fo
 <main>
 <div id="acct" class="acct" hidden><span>Signed in as <b id="who"></b></span><span id="sync" class="sync" aria-live="polite"></span><button class="btn ghost sm" id="so" type="button">Sign out</button></div>
 <div id="cfl" class="cfl" hidden><span>This account was changed on another device. Which copy do you want to keep?</span><button class="btn sm" id="cfl-load" type="button">Use the latest</button><button class="btn ghost sm" id="cfl-keep" type="button">Keep this device&rsquo;s</button></div>
-<h1>GuardReserveGuru <span class="ver">v4</span></h1>
+<h1>GuardReserveGuru <span class="ver">v5</span></h1>
 <p class="sub">Log duty by pay status, watch your retirement points, and let GuardReserveGuru line up currency items with paid days. Your data saves to your account so it follows you to any device. Keep entries generic: no PII, unit details or CUI.</p>
 <nav role="tablist" id="tabs"></nav>
 <div id="view"></div>
 </main>
 <div id="modal"></div>
 <div id="auth" hidden><form class="panel authcard" id="af" autocomplete="on" novalidate>
-<h1 style="font-size:22px">GuardReserveGuru <span class="ver">v4</span></h1>
+<h1 style="font-size:22px">GuardReserveGuru <span class="ver">v5</span></h1>
 <p class="sub" id="am" style="margin-bottom:12px">Sign in to load your data.</p>
 <div class="seg"><button type="button" class="btn ghost" id="mi" aria-pressed="true">Sign in</button><button type="button" class="btn ghost" id="mn" aria-pressed="false">Create account</button></div>
 <label for="an">Name or callsign</label>
@@ -202,7 +202,7 @@ function oeRender(focus){
     <div class='w'><label for='oem'>Pay amount ($)</label><input type='number' id='oem' min='0' step='0.01' value='${OE.manual}' placeholder='${calc.toFixed(2)} calculated' ${dis}></div>
     <div class='w' style='grid-column:1/-1'><label for='oen'>Note</label><input id='oen' value='${esc(OE.note)}' placeholder='Order number or what it was' maxlength='120' autocomplete='off' ${dis}></div>
     ${oc?`<div class='w' style='grid-column:1/-1;display:flex;gap:14px;flex-wrap:wrap'>${[['bah','BAH'],['bas','BAS']].map(([k,l])=>`<label style='display:inline-flex;gap:6px;align-items:center;color:var(--ink);font-size:14px;margin:0'><input type='checkbox' data-oop='${k}' style='width:auto' ${+x[k]?'checked':''} ${dis}>${l}</label>`).join('')}</div>
-    <div class='w' style='grid-column:1/-1'><div class='mute' style='margin-bottom:3px'>Calculated pay, ${oc.n} day${oc.n===1?'':'s'}${oc.n>30?' (over 30 days: locality BAH)':' (30 days or fewer: BAH RC/T)'}</div>${ordBreak(oc,OE.manual)}</div>`:''}
+    <div class='w' style='grid-column:1/-1'><div class='mute' style='margin-bottom:3px'>Calculated pay, ${oc.n} day${oc.n===1?'':'s'}${oc.n>31?' (over 31 days: locality BAH)':' (31 days or fewer: BAH RC/T)'}</div>${ordBreak(oc,OE.manual)}</div>`:''}
    </div>
    <div class='err' id='oeerr' role='alert'>${esc(OE.err)}</div>
    <div class='row' style='justify-content:space-between;align-items:center'>
@@ -746,7 +746,7 @@ function pay(){
 /* ---------- Orders pay, prorated by DoD FMR Vol 7A ----------
    Orders under 30 days: 1/30 of the monthly rate for every day, 31st included.
    Orders of 30 days or more: 30-day months. The 31st isn't paid, and serving through the end of February counts as 30 days.
-   BAH: orders of 30 days or fewer get BAH RC/T (non-locality, "Type II"); orders of more than 30 days get locality BAH.
+   BAH: orders of 31 days or fewer get BAH RC/T (non-locality, "Type II"); orders of more than 31 days get locality BAH.
    Special pay (HFP, IDP, HDP-L) is marked per date on the calendar. CZTE is set per calendar month. */
 const BAS26={off:328.48,enl:476.95};
 /* 2026 non-locality BAH (BAH RC/T), effective Jan 1, 2026, travel.dod.mil: [without dependents, with dependents] */
@@ -777,9 +777,9 @@ const w30=k=>{const x=pd(k),day=x.getDate(),last=eomOf(x).getDate();return day==
 function ordRaw(d){
   const o=OP(),x=ordOpts(d),n=ordSpan(d),long=n>=30,s=pd(d.date),g=opGrade(),dep=+o.dep?1:0;
   const basicM=g?curPay().m:(S.rate||0)*30,fpM=g&&+o.fp?fpMonthly():0;
-  const bahT=n>30?'loc':'rc',rc=(BAHRC[bahGrade()]||[0,0])[dep];let bahM=0,warn=[];
+  const bahT=n>31?'loc':'rc',rc=(BAHRC[bahGrade()]||[0,0])[dep];let bahM=0,warn=[];
   if(g&&+x.bah){if(bahT==='loc'){const v=bahLoc(bahGrade(),dep);if(v>0)bahM=v;else{bahM=rc;warn.push(`No housing area is set in Settings, so BAH RC/T is used for these ${n}-day orders.`)}}else bahM=rc}
-  const basM=g&&+x.bas?(isOff(g)?BAS26.off:BAS26.enl):0,days=[];
+  const basM=g&&+x.bas?(/^[OW]-/.test(g)?BAS26.off:BAS26.enl):0,days=[];
   for(let i=0;i<n;i++){const k=iso(addDays(s,i)),w=long?w30(k):1;days.push({k,w,basic:basicM/30*w,fp:fpM/30*w,bah:bahM/30*w,bas:basM/30*w,ex:0})}
   if(!g)warn.push('Set your pay grade in the basic pay lookup to add BAH and BAS. Until then only basic pay at your daily rate is counted.');
   return{n,long,bahT,bahM,basM,basicM,fpM,dep,g,days,warn,tot:ordSum(days)};
@@ -900,12 +900,12 @@ function ordPayPanel(){
   ${g&&/^O-[123]$/.test(g)?`<div class='mute' style='flex:2 1 220px;align-self:end'>Over 4 years of prior enlisted or warrant service? Pick ${esc(g)}E in the basic pay lookup for the right basic pay and BAH.</div>`:''}</div>
   <h2 style='margin:14px 0 6px;font-size:15px'>BAH</h2>
   <div class='tbl'><table class='mini'><tr><th></th><th>Without dependents</th><th>With dependents</th></tr>
-  <tr><th>BAH RC/T (Type II), orders of 30 days or fewer${bg?', '+esc(bg):''}</th>${cell(rc[0],!dep)}${cell(rc[1],dep)}</tr>
-  <tr><th>Locality BAH, orders of 31 days or more${o.mha&&BAHL[o.mha]?', '+esc(bahNm(o.mha)):''}</th>${o.mha&&BAHL[o.mha]?(g?cell(bahLoc(bg,0),!dep)+cell(bahLoc(bg,1),dep):`<td colspan='2' class='mute'>Set your pay grade</td>`):`<td><input type='number' min='0' step='0.01' data-op='lwo' value='${esc(o.lwo)}' placeholder='$/mo' style='width:110px' aria-label='Locality BAH without dependents'></td><td><input type='number' min='0' step='0.01' data-op='lw' value='${esc(o.lw)}' placeholder='$/mo' style='width:110px' aria-label='Locality BAH with dependents'></td>`}</tr></table></div>
+  <tr><th>BAH RC/T (Type II), orders of 31 days or fewer${bg?', '+esc(bg):''}</th>${cell(rc[0],!dep)}${cell(rc[1],dep)}</tr>
+  <tr><th>Locality BAH, orders of 32 days or more${o.mha&&BAHL[o.mha]?', '+esc(bahNm(o.mha)):''}</th>${o.mha&&BAHL[o.mha]?(g?cell(bahLoc(bg,0),!dep)+cell(bahLoc(bg,1),dep):`<td colspan='2' class='mute'>Set your pay grade</td>`):`<td><input type='number' min='0' step='0.01' data-op='lwo' value='${esc(o.lwo)}' placeholder='$/mo' style='width:110px' aria-label='Locality BAH without dependents'></td><td><input type='number' min='0' step='0.01' data-op='lw' value='${esc(o.lw)}' placeholder='$/mo' style='width:110px' aria-label='Locality BAH with dependents'></td>`}</tr></table></div>
   <div class='row' style='margin-top:6px'><div style='flex:2 1 260px'><label for='opmha'>Military housing area of your primary residence</label><select id='opmha' data-op='mha'><option value='' ${o.mha?'':'selected'}>Not listed: enter the amounts myself</option>${(()=>{const by={};Object.keys(BAHL).forEach(k=>{const st=BAHL[k][1]==='ZZ'?'Other counties':BAHL[k][1];(by[st]=by[st]||[]).push(k)});return Object.keys(by).sort((a,b)=>(a==='Other counties')-(b==='Other counties')||a.localeCompare(b)).map(st=>`<optgroup label='${st}'>${by[st].sort((a,b)=>bahNm(a).localeCompare(bahNm(b),undefined,{numeric:true})).map(k=>`<option value='${k}' ${o.mha===k?'selected':''}>${esc(bahNm(k))} (${k})</option>`).join('')}</optgroup>`).join('')})()}</select></div>
   <div class='mute' style='flex:3 1 260px;align-self:end'>Locality BAH follows the ZIP code of your primary residence when the orders were issued. If you don’t know its housing area, enter the ZIP on the <a href='https://www.travel.dod.mil/Allowances/Basic-Allowance-for-Housing/BAH-Rate-Lookup/' target='_blank' rel='noopener'>DoD BAH calculator</a>; it shows the area name. Rates: 2026 DoD BAH file, all 338 areas.</div></div>
   <h2 style='margin:14px 0 6px;font-size:15px'>BAS</h2>
-  <div class='tbl'><table class='mini'><tr><th>Officer</th><th>Enlisted</th></tr><tr>${cell(BAS26.off,g&&isOff(g))}${cell(BAS26.enl,g&&!isOff(g))}</tr></table></div>
+  <div class='tbl'><table class='mini'><tr><th>Officer / warrant</th><th>Enlisted</th></tr><tr>${cell(BAS26.off,g&&/^[OW]-/.test(g))}${cell(BAS26.enl,g&&/^E-/.test(g))}</tr></table></div>
   <h2 style='margin:14px 0 6px;font-size:15px'>Include on orders</h2>
   <div>${ck('bah','BAH')}${ck('bas','BAS')}${ck('fp',`Flight pay${fpMonthly()?' ('+money(fpMonthly())+'/mo)':' (none set)'}`)}</div>
   <h2 style='margin:14px 0 6px;font-size:15px'>Special pay and taxes</h2>
@@ -916,7 +916,7 @@ function ordPayPanel(){
   <tr><th>Hostile fire pay (full month)</th><td${R.hfp===225?" class='on'":''}>$225/mo</td><td${R.hfp===450?" class='on'":''}>$450/mo</td></tr>
   <tr><th>HDP-L top rate</th><td${R.hdpMax===150?" class='on'":''}>$150/mo</td><td${R.hdpMax===100?" class='on'":''}>$100/mo</td></tr></table></div>
   <div class='grid' style='margin-top:14px'>${[['15-day orders',15],['30-day orders',30],['45-day orders',45]].map(([l,n])=>`<div><div class='mute'>${l} starting today</div><div class='big' style='font-size:20px'>${ex(n)}</div></div>`).join('')}</div>
-  <p class='mute'>How it’s calculated (DoD FMR Volume 7A): pay and allowances are 1/30 of the monthly rate per day. Orders under 30 days are paid for every day, including the 31st. Orders of 30 days or more are paid on 30-day months, so the 31st isn’t paid and serving through the end of February counts as 30 days. Orders of 30 days or fewer get BAH RC/T; orders of more than 30 days get locality BAH for your primary residence. IDP is paid for each day in the area up to the monthly rate (chapter 10). HFP is the full monthly rate for any month you qualify and is never prorated; HFP and IDP can’t both be paid in the same month. HDP-L is 1/30 of the monthly rate per day; on temporary duty it’s paid only after more than 30 consecutive days, then back to the first day, and is held to $100 a month alongside HFP or IDP (chapter 17). Special pay counts only on days with a pay status: paid orders, a UTA period, or an FTP or GTP. CZTE works by calendar month: one day in a combat zone makes that month’s military pay tax-free, all of it for enlisted and warrant officers, and up to ${money(SEA26)} (senior enlisted basic pay) plus HFP or IDP for officers. BAH and BAS are always tax-free. The tax estimate is one flat rate on taxable pay and leaves out FICA. Rates: <a href='https://www.travel.dod.mil/Portals/119/Documents/BAH/PDF_Non-Locality-BAH-Rates/2026-Non-Locality-BAH-Rates.pdf' target='_blank' rel='noopener'>2026 non-locality BAH</a> (Jan 1, 2026) and <a href='https://militarypay.defense.gov/PAY/ALLOWANCES/bas.aspx' target='_blank' rel='noopener'>2026 BAS</a>. The 2027 tables aren’t published yet, so 2027 dates use 2026 rates.</p></div>`;
+  <p class='mute'>How it’s calculated (DoD FMR Volume 7A): pay and allowances are 1/30 of the monthly rate per day. Orders under 30 days are paid for every day, including the 31st. Orders of 30 days or more are paid on 30-day months, so the 31st isn’t paid and serving through the end of February counts as 30 days. Orders of 31 days or fewer get BAH RC/T; orders of more than 31 days get locality BAH for your primary residence. IDP is paid for each day in the area up to the monthly rate (chapter 10). HFP is the full monthly rate for any month you qualify and is never prorated; HFP and IDP can’t both be paid in the same month. HDP-L is 1/30 of the monthly rate per day; on temporary duty it’s paid only after more than 30 consecutive days, then back to the first day, and is held to $100 a month alongside HFP or IDP (chapter 17). Special pay counts only on days with a pay status: paid orders, a UTA period, or an FTP or GTP. CZTE works by calendar month: one day in a combat zone makes that month’s military pay tax-free, all of it for enlisted and warrant officers, and up to ${money(SEA26)} (senior enlisted basic pay) plus HFP or IDP for officers. BAH and BAS are always tax-free. The tax estimate is one flat rate on taxable pay and leaves out FICA. Rates: <a href='https://www.travel.dod.mil/Portals/119/Documents/BAH/PDF_Non-Locality-BAH-Rates/2026-Non-Locality-BAH-Rates.pdf' target='_blank' rel='noopener'>2026 non-locality BAH</a> (Jan 1, 2026) and <a href='https://militarypay.defense.gov/PAY/ALLOWANCES/bas.aspx' target='_blank' rel='noopener'>2026 BAS</a>. The 2027 tables aren’t published yet, so 2027 dates use 2026 rates.</p></div>`;
 }
 /*@@RATES@@*/
 const GSA_FY=2027;
