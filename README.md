@@ -1,4 +1,4 @@
-# GuardReserveGuru v4: accounts + Cloudflare database
+# GuardReserveGuru v5: accounts + Cloudflare database
 
 Login is **name/callsign + last 4 of phone**. Each person's data lives in your Cloudflare D1 database and follows them to any device. It still works offline and syncs when back online.
 
