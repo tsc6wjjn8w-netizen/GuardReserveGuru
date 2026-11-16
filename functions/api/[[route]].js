@@ -1,6 +1,6 @@
-// GuardReserveGuru v2 API — Cloudflare Pages Function + D1
+// GuardReserveGuru v4 API — Cloudflare Pages Function + D1
 // Routes: POST register | POST login | POST logout | GET data | PUT data
-// Optional env: SIGNUP_CODE (invite code needed to create accounts), PIN_PEPPER (secret mixed into PIN hashes)
+// Optional env: PIN_PEPPER (secret mixed into PIN hashes)
 
 const enc = new TextEncoder();
 const NOW = () => Date.now();
@@ -59,7 +59,6 @@ export async function onRequest({ request, env }) {
 
     if (route === 'register' && method === 'POST') {
       const b = await readBody(request);
-      if (env.SIGNUP_CODE && String(b.code || '').trim() !== env.SIGNUP_CODE) return fail('Invite code is missing or wrong.', 403);
       if (!nameOk(b.name)) return fail('Name must be 2–30 characters (letters, numbers, spaces, . _ - \').');
       if (!pinOk(b.pin)) return fail('Last 4 must be exactly 4 digits.');
       if (b.data !== undefined && !dataOk(b.data)) return fail('Import data is invalid or too large.');
