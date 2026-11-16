@@ -47,13 +47,13 @@ th{font-weight:500;color:var(--mute);font-size:13px}
 .mute{color:var(--mute);font-size:13px}
 .pt{min-width:920px}.pt td,.pt th{white-space:nowrap;padding:5px 7px;font-size:12px}.pt td:first-child,.pt th:first-child{position:sticky;left:0;background:var(--card);font-weight:600}.pt td.sel{background:var(--okbg);font-weight:600}
 a{color:var(--acc)}
-.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}.cal button{min-width:0;overflow:hidden}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}.cal .cw{position:relative;min-width:0;display:flex}.cal .cw>button{flex:1 1 auto;width:100%}.cal .idpck{position:absolute;top:4px;right:4px;width:16px;height:16px;margin:0;padding:0;accent-color:var(--bad);cursor:pointer}.cal button{min-width:0;overflow:hidden}
 @media (max-width:600px){.cbn{font-size:9px;padding:1px 2px;border-left-width:2px}}.cal .h{font-size:12px;color:var(--mute);text-align:center;padding:4px 0}
 .cal button{min-height:92px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:3px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;font-size:12px;display:flex;flex-direction:column;justify-content:space-between;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .12s}
 .cal button.press{transform:scale(.95);outline:2px solid var(--acc)}
 .cal button.out{opacity:.45}.cal button.today{border:2px solid var(--acc)}.cal button.sel{background:var(--card);outline:2px solid var(--acc)}
 .dots{display:flex;gap:3px;flex-wrap:wrap;align-items:center}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.d-duty{background:var(--acc)}.d-plan{border:2px solid var(--acc)}.d-cur{background:var(--warn)}.d-curbad{background:var(--bad)}.d-trav{background:var(--ok)}.d-tp{background:var(--mute)}.d-ftp{background:var(--ftp)}.d-gtp{background:var(--gtp)}
+.d-duty{background:var(--acc)}.d-plan{border:2px solid var(--acc)}.d-cur{background:var(--warn)}.d-curbad{background:var(--bad)}.d-trav{background:var(--ok)}.d-sp{background:var(--bad)}.d-tp{background:var(--mute)}.d-ftp{background:var(--ftp)}.d-gtp{background:var(--gtp)}
 .ev{display:flex;align-items:center;gap:3px;font-size:10px;line-height:1.25;white-space:nowrap;overflow:hidden;max-width:100%}.ev .dot{flex:0 0 8px}.ev span{overflow:hidden;text-overflow:ellipsis}
 .ev .tm{color:var(--mute);flex:0 1 auto;margin-left:2px}
 .ctop{display:flex;flex-direction:column;width:100%;min-width:0}.cbns{display:flex;flex-direction:column;gap:2px;width:100%;margin:2px 0}.cbn{display:block;font-size:10px;font-weight:600;line-height:1.35;padding:1px 4px;border-radius:3px;border-left:3px solid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.cbn.ok{background:var(--okbg);color:var(--ok)}.cbn.warn{background:var(--warnbg);color:var(--warn)}.cbn.bad{background:var(--badbg);color:var(--bad)}.cbn.more{background:var(--line);color:var(--mute);border-left-color:var(--mute)}
@@ -119,7 +119,7 @@ const DEF={rate:0,member:15,yearStart:"",types:[
 {id:"pts",name:"Points only (no pay)",unit:"period",pts:1,paid:false}],duty:[],curr:[],vouchers:[]};
 let S=load(),tab="dash";
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({},DEF,JSON.parse(r))}catch(e){}return JSON.parse(JSON.stringify(DEF))}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){spReset();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pd=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
@@ -149,8 +149,8 @@ let OE=null;
 function oeOpen(i,date,type,back){
   if(ED)edClose();
   const d=i==null?null:S.duty[i];
-  OE=d?{i,type:d.type,date:d.date,units:d.units,ps:d.ps||'none',manual:hasManual(d)?d.manual:'',start:d.start||'',end:d.end||'',note:d.slot?(d.memo||''):(d.note||''),err:''}
-      :{i:null,type:type||'',date:date||iso(today()),units:1,ps:'none',manual:'',start:'',end:'',note:'',err:''};
+  OE=d?{i,type:d.type,date:d.date,units:d.units,ps:d.ps||'none',manual:hasManual(d)?d.manual:'',start:d.start||'',end:d.end||'',note:d.slot?(d.memo||''):(d.note||''),op:ordOpts(d),err:''}
+      :{i:null,type:type||'',date:date||iso(today()),units:1,ps:'none',manual:'',start:'',end:'',note:'',op:ordOpts(null),err:''};
   OE.back=back||'';OE.wasPaid=OE.ps==='paid';document.body.classList.add('lock');oeRender(true);
 }
 function oeClose(){const b=OE&&OE.back;OE=null;document.body.classList.remove('lock');$('#modal').innerHTML='';if(b)edOpen(b)}
@@ -159,7 +159,7 @@ function oeRender(focus){
   if(m.contains(document.activeElement))document.activeElement.blur();
   const ty=T(OE.type),lk=OE.ps==='paid',dis=lk?'disabled':'',isNew=OE.i==null;
   const end=OE.type&&ty.unit==='day'?iso(addDays(pd(OE.date),Math.max(1,+OE.units||1)-1)):'';
-  const calc=OE.type&&ty.paid?S.rate*Math.max(1,+OE.units||1):0;
+  const oc=OE.type&&ordPaid(OE.type)?ordCalc({type:OE.type,date:OE.date,units:Math.max(1,Math.min(365,Math.floor(+OE.units)||1)),op:OE.op}):null,calc=oc?oc.tot.gross:0,x=OE.op;
   const opts=S.types.filter(t=>ORD.includes(t.id)).map(t=>`<option value='${t.id}' ${OE.type===t.id?'selected':''}>${esc(t.name)}${t.id==='at'?' (counts toward annual tour)':MAN.includes(t.id)?' (man days)':''}</option>`).join('');
   m.innerHTML=`<div class='ov' id='ovl'><div class='dlg' role='dialog' aria-modal='true' aria-labelledby='oet'>
    <div style='display:flex;justify-content:space-between;align-items:start;gap:10px'><div><h2 id='oet'>${isNew?'Add orders':'Edit orders'}</h2><div class='mute'>${OE.type&&OE.date?fmt(OE.date)+(end&&end!==OE.date?' to '+fmt(end):''):'Choose a type and start date'}</div></div><button class='btn ghost sm' id='oex' aria-label='Close'>✕</button></div>
@@ -173,6 +173,8 @@ function oeRender(focus){
     <div class='w'><label for='oeps'>Pay status</label><select id='oeps'>${PS.map(([k,n])=>`<option value='${k}' ${OE.ps===k?'selected':''}>${n}</option>`).join('')}</select></div>
     <div class='w'><label for='oem'>Pay amount ($)</label><input type='number' id='oem' min='0' step='0.01' value='${OE.manual}' placeholder='${calc.toFixed(2)} calculated' ${dis}></div>
     <div class='w' style='grid-column:1/-1'><label for='oen'>Note</label><input id='oen' value='${esc(OE.note)}' placeholder='Order number or what it was' maxlength='120' autocomplete='off' ${dis}></div>
+    ${oc?`<div class='w' style='grid-column:1/-1;display:flex;gap:14px;flex-wrap:wrap'>${[['bah','BAH'],['bas','BAS']].map(([k,l])=>`<label style='display:inline-flex;gap:6px;align-items:center;color:var(--ink);font-size:14px;margin:0'><input type='checkbox' data-oop='${k}' style='width:auto' ${+x[k]?'checked':''} ${dis}>${l}</label>`).join('')}</div>
+    <div class='w' style='grid-column:1/-1'><div class='mute' style='margin-bottom:3px'>Calculated pay, ${oc.n} day${oc.n===1?'':'s'}${oc.n>30?' (over 30 days: locality BAH)':' (30 days or fewer: BAH RC/T)'}</div>${ordBreak(oc,OE.manual)}</div>`:''}
    </div>
    <div class='err' id='oeerr' role='alert'>${esc(OE.err)}</div>
    <div class='row' style='justify-content:space-between;align-items:center'>
@@ -184,7 +186,8 @@ function oeRender(focus){
   const del=$('#oedel');if(del)del.onclick=()=>{if(!del.dataset.ok){del.dataset.ok=1;del.textContent='Click again to delete';return}oeDelete()};
   const sync=()=>{OE.date=$('#oed').value||OE.date;OE.units=$('#oeu').value;OE.manual=$('#oem').value;OE.note=$('#oen').value};
   $('#oety').onchange=e=>{sync();OE.type=e.target.value;OE.err='';oeRender()};
-  $('#oed').onchange=()=>{sync();oeRender()};$('#oeu').onchange=()=>{sync();oeRender()};
+  $('#oed').onchange=()=>{sync();oeRender()};$('#oeu').onchange=()=>{sync();oeRender()};$('#oem').onchange=()=>{sync();oeRender()};
+  $('#modal').querySelectorAll('[data-oop]').forEach(e=>e.onchange=()=>{sync();const k=e.dataset.oop;OE.op=Object.assign({},OE.op,{[k]:e.type==='checkbox'?(e.checked?1:0):e.value});oeRender()});
   $('#oeps').onchange=e=>{sync();OE.ps=e.target.value;oeRender()};
   [['#oes','start'],['#oee','end']].forEach(([id,f])=>{const el=$(id);el.onblur=()=>{const v=p24(el.value);if(v===null){OE['bad'+f]=true;t24Mark(el,false)}else{OE['bad'+f]=false;OE[f]=v;el.value=t24v(v);t24Mark(el,true)}}});
   if(focus){const f=OE.type?$('#oesv'):$('#oety');if(f)f.focus({preventScroll:true})}
@@ -197,31 +200,38 @@ function oeSave(){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(OE.date||''))return oeErr('Enter a start date.');
   const u=Math.floor(+OE.units);if(!(u>=1&&u<=365))return oeErr('Enter how many days, from 1 to 365.');
   if(OE.badstart||OE.badend)return oeErr('Enter times as 24-hour HHMM, for example 0730 or 1630.');
-  const f={date:OE.date,type:OE.type,units:u,start:OE.start||'',end:OE.end||'',manual:OE.manual===''?'':Number(OE.manual)};
+  const f={date:OE.date,type:OE.type,units:u,start:OE.start||'',end:OE.end||'',manual:OE.manual===''?'':Number(OE.manual),op:Object.assign({},OE.op)};
   let d=OE.i==null?null:S.duty[OE.i];
   if(!d){
     /* a new AT entry takes the next open AT block, so it shows in the Annual tour table */
     const blk=OE.type==='at'?atSlots().find(x=>!slotGet(x.id,'at').date):null;
-    if(blk){setSlotQuiet(blk.id,'at',{date:f.date,days:u,start:f.start,end:f.end,memo:OE.note});d=S.duty.find(x=>x.slot===blk.id);Object.assign(d,{manual:f.manual})}
+    if(blk){setSlotQuiet(blk.id,'at',{date:f.date,days:u,start:f.start,end:f.end,memo:OE.note});d=S.duty.find(x=>x.slot===blk.id);Object.assign(d,{manual:f.manual,op:f.op})}
     else{d=Object.assign({note:OE.note,ps:'none',sdate:'',pdate:''},f);S.duty.push(d)}
   }else if(d.slot&&/^at-/.test(d.slot)){
-    if(OE.type==='at'){setSlotQuiet(d.slot,'at',{date:f.date,days:u,start:f.start,end:f.end,memo:OE.note});d=S.duty.find(x=>x.slot===d.slot);d.manual=f.manual}
+    if(OE.type==='at'){setSlotQuiet(d.slot,'at',{date:f.date,days:u,start:f.start,end:f.end,memo:OE.note});d=S.duty.find(x=>x.slot===d.slot);d.manual=f.manual;d.op=f.op}
     else{const id=d.slot;delete d.slot;if(S.slots&&S.slots[id])S.slots[id]=Object.assign({},S.slots[id],{date:'',memo:''});Object.assign(d,f,{note:OE.note,memo:''})}
   }else Object.assign(d,f,{note:OE.note});
   setPs(d,OE.ps);save();const D=f.date;if(OE.back)OE.back=D;oeClose();CAL.sel=D;const x=pd(D);CAL.y=x.getFullYear();CAL.m=x.getMonth();render();
 }
 function oeDelete(){const d=S.duty[OE.i];if(!d||OE.ps==='paid')return;if(d.slot&&S.slots&&S.slots[d.slot]){S.slots[d.slot].date='';S.slots[d.slot].memo='';S.slots[d.slot].conf=0}S.duty.splice(OE.i,1);save();oeClose();if(!ED)render()}
 const hasManual=d=>d.manual!==undefined&&d.manual!==""&&d.manual!==null;
-const dutyPay=d=>d.rs==='pts'?0:hasManual(d)?Number(d.manual)||0:(T(d.type).paid?d.units*S.rate:0);
+const dutyPay=d=>d.rs==='pts'?0:hasManual(d)?Number(d.manual)||0:calcPay(d);
 const ageTxt=s=>{const n=Math.round((today()-pd(s))/864e5);return n<=0?"today":n+"d ago"};
-function payTotals(){const w=yearWindow(),t=today(),r={none:0,submitted:0,paid:0};S.duty.forEach(d=>{const dt=pd(d.date);if(dt<w.s||dt>w.e||dt>t)return;r[d.ps||"none"]+=dutyPay(d)});return r}
+function payTotals(){const w=yearWindow(),t=today(),a=iso(w.s),b=iso(t<w.e?t:w.e),r={none:0,submitted:0,paid:0};S.duty.forEach(d=>{r[d.ps||"none"]+=dutyPayIn(d,a,b)});return r}
 function voucherTotals(){const r={draft:0,submitted:0,paid:0};S.vouchers.forEach(v=>{r[v.status]+=(v.status==="paid"&&v.paidAmt!==""&&v.paidAmt!=null)?Number(v.paidAmt)||0:Number(v.amount)||0});return r}
 function stats(){
-  const w=yearWindow(),t=today();let done=0,plan=0,payD=0,payP=0;
-  S.duty.forEach(d=>{const dt=pd(d.date);if(dt<w.s||dt>w.e)return;const ty=T(d.type);
+  const w=yearWindow(),t=today(),a=iso(w.s),b=iso(w.e),ts=iso(t),tn=iso(addDays(t,1));let done=0,plan=0,payD=0,payP=0,ordD=0,ordP=0;
+  S.duty.forEach(d=>{const ty=T(d.type);
+    if(ORD.includes(d.type)&&ty.unit==='day'){
+      /* orders: each day counts on its own date, so a tour that has started is part earned and part planned */
+      for(let i=0;i<ordSpan(d);i++){const k=iso(addDays(pd(d.date),i));if(k<a||k>b)continue;k<=ts?done+=ty.pts:plan+=ty.pts}
+      const e=dutyPayIn(d,a,ts<b?ts:b),f=tn<=b?dutyPayIn(d,tn>a?tn:a,b):0;payD+=e;payP+=f;
+      if(ordPaid(d.type)){ordD+=e;ordP+=f}return}
+    const dt=pd(d.date);if(dt<w.s||dt>w.e)return;
     const p=ty.pts*d.units,m=dutyPay(d);
     if(dt<=t){done+=p;payD+=m}else{plan+=p;payP+=m}});
-  return{w,done,plan,payD,payP,total:S.member+done};
+  const te=ts<b?ts:b,spD=spIn(a,te),spP=tn<=b?spIn(tn>a?tn:a,b):0;payD+=spD;payP+=spP;
+  return{w,done,plan,payD,payP,ordD,ordP,spD,spP,free:freeIn(a,te),total:S.member+done};
 }
 /* Expiry basis: 'day' = exactly N days after last done; 'eom' = valid through the end of the month that date falls in */
 const CB=[['day','On the day'],['eom','End of month']];
@@ -338,6 +348,9 @@ function calEvents(){
     for(let i=0;i<n;i++){const dt=addDays(s,i),fut=dt>t,nm=sm?'UTA period '+mon+' '+sm[3]+(RSN('uta',d.rs)&&d.rs!=='uta'?', '+RSN('uta',d.rs):'')+(d.memo?' ('+d.memo+')':''):ty.name+(d.note?' ('+d.note+')':'');
       add(iso(dt),{k:'duty',ix,c:fut?'d-plan':'d-duty',t:nm+(d.start&&d.end?', '+d.start+' to '+d.end+(h?' ('+h.toFixed(1)+' h)':''):'')+(amt?', '+money(amt):'')+', '+(fut?'planned':stt),u:sm?{m:mon,p:sm[3]}:null,s:sm?'':(tid==='pts'?'Pts':tid.toUpperCase()),tm:tmTxt(d.start,d.end),slot:!!sm,uta:tid==='uta'})}});
   S.curr.forEach(c=>{const{due,left}=currInfo(c);add(iso(due),{k:'cur',c:left<0?'d-curbad':'d-cur',t:(c.cat?c.cat+': ':'')+c.name+(left<0?' lapsed':' expires'),bn:{n:c.name,v:left<0?'bad':left<=14?'warn':'ok'}})});
+  {const sc=spCalc();Object.entries(S.sp||{}).forEach(([k,v])=>{const a=sc.d[k]||{hf:0,hdp:0},amt=a.hf+a.hdp,hd=+v.hdp>0;
+    add(k,{k:'sp',c:'d-sp',s:hd?'HDP-L':'',nocell:!hd,t:'Special pay: '+[v.idp?'IDP':'',hd?'HDP-L $'+v.hdp+'/mo':''].filter(Boolean).join(', ')+(amt?', '+money(amt)+' this day':'')+(sc.st[k]?'. '+sc.st[k]:'')})});
+   Object.entries(sc.m).forEach(([m,x])=>{if(x.hft==='hfp'&&x.hfd)add(x.hfd,{k:'sp',c:'d-sp',nocell:1,t:`Hostile fire pay for ${pd(m+'-01').toLocaleDateString(undefined,{month:'long'})}: ${money(HFR(x.hfd).hfp)}, full month`})})}
   S.vouchers.forEach(v=>add(v.date,{k:'trav',c:'d-trav',t:'Travel voucher ('+v.status+'): '+v.desc+', '+money(Number(v.amount)||0)}));
   Object.entries(S.tpd||{}).forEach(([k,v])=>{TPK.forEach(([kd,,nm])=>{const L=tpList(v,kd);if(!L.length)return;const run=tpRun(k,kd),fut=pd(k)>t;
     L.forEach((it,i)=>{const no=run-L.length+i+1,tm=tmTxt(it.start,it.end),h=hrs(it.start,it.end);add(k,{k:'tp',c:'d-'+kd,t:kd.toUpperCase()+' ('+nm.toLowerCase()+' TP), #'+no+' this quarter'+(RSN(kd,it.rs)?', '+RSN(kd,it.rs):'')+(it.note?' ('+it.note+')':'')+(tm?', '+tm+(h?' ('+h.toFixed(1)+' h)':''):'')+', '+(fut?'planned':psName(it.ps).toLowerCase()),s:kd.toUpperCase()+' '+no,tm})})})});
@@ -355,17 +368,19 @@ function calendar(){
   const pre=CAL.y+'-'+String(CAL.m+1).padStart(2,'0'),all=Object.entries(E).filter(([k])=>k.startsWith(pre)).flatMap(([,v])=>v),cnt=k=>all.filter(e=>e.k===k).length;
   let cells='';
   for(let i=0;i<42;i++){const d=addDays(start,i),k=iso(d),ev=E[k]||[];
-    cells+=`<button data-cd='${k}' class='${d.getMonth()!==CAL.m?'out ':''}${k===ts?'today ':''}${k===CAL.sel?'sel':''}' aria-label='${esc(d.toDateString())}, ${ev.length} item(s)'>${cellHtml(ev,d.getDate())}</button>`}
+    const ip=!!((S.sp||{})[k]||{}).idp,ck=onDuty(k)||ip;
+    cells+=`<div class='cw'><button data-cd='${k}' class='${d.getMonth()!==CAL.m?'out ':''}${k===ts?'today ':''}${k===CAL.sel?'sel':''}' aria-label='${esc(d.toDateString())}, ${ev.length} item(s)'>${cellHtml(ev.filter(e=>!e.nocell),d.getDate())}</button>${ck?`<input type='checkbox' class='idpck' data-idp='${k}' ${ip?'checked':''} title='Imminent danger pay (IDP) on this day' aria-label='IDP on ${esc(d.toDateString())}'>`:''}</div>`}
   const sel=E[CAL.sel]||[];
   return `<div class='panel'><div class='row' style='align-items:center'><div style='flex:0 0 auto'><button class='btn ghost sm' id='cprev' aria-label='Previous month'>Prev</button></div><h2 style='flex:1;margin:0;text-align:center'>${title}</h2><div style='flex:0 0 auto'><button class='btn ghost sm' id='ctoday'>Today</button> <button class='btn ghost sm' id='cnext' aria-label='Next month'>Next</button></div></div>
-  <p class='mute' style='text-align:center;margin:6px 0'>${cnt('duty')} duty day(s), ${cnt('cur')} currency date(s), ${cnt('trav')} voucher(s), ${cnt('tp')} FTP/GTP this month</p>
+  <p class='mute' style='text-align:center;margin:6px 0'>${cnt('duty')} duty day(s), ${cnt('cur')} currency date(s), ${cnt('trav')} voucher(s), ${cnt('tp')} FTP/GTP, ${cnt('sp')} special pay day(s) this month${czOn(pre)?" · <span class='tag bad'>CZTE month</span>":''}</p>
   <div class='hint'><b>Right-click</b> a day (or <b>press and hold</b> on a phone or tablet) to add UTA periods, FTPs or GTPs.</div>
   <div class='cal'>${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class='h'>${x}</div>`).join('')}${cells}</div>
-  <div class='leg'><span><i class='dot d-duty'></i>Duty done</span><span><i class='dot d-plan'></i>Duty planned</span><span><i class='dot d-ftp'></i>FTP</span><span><i class='dot d-gtp'></i>GTP</span><span><i class='cbn ok' style='display:inline-block;font-style:normal'>Due</i> Currency, over 14 days left</span><span><i class='cbn warn' style='display:inline-block;font-style:normal'>Due</i> 14 days or fewer</span><span><i class='cbn bad' style='display:inline-block;font-style:normal'>Due</i> Lapsed</span><span><i class='dot d-trav'></i>Travel voucher</span></div>
+  <div class='leg'><span><i class='dot d-duty'></i>Duty done</span><span><i class='dot d-plan'></i>Duty planned</span><span><i class='dot d-ftp'></i>FTP</span><span><i class='dot d-gtp'></i>GTP</span><span><i class='cbn ok' style='display:inline-block;font-style:normal'>Due</i> Currency, over 14 days left</span><span><i class='cbn warn' style='display:inline-block;font-style:normal'>Due</i> 14 days or fewer</span><span><i class='cbn bad' style='display:inline-block;font-style:normal'>Due</i> Lapsed</span><span><i class='dot d-trav'></i>Travel voucher</span><span><input type='checkbox' checked disabled style='width:12px;height:12px;margin:0;accent-color:var(--bad)'> IDP (top-right of a day)</span><span><i class='dot d-sp'></i>HDP-L</span></div>
   <h2 style='margin-top:14px'>${fmt(CAL.sel)}</h2>
   ${dayActions(CAL.sel)}
-  ${sel.length?sel.map(e=>{const pd2=e.k==='duty'?S.duty[e.ix]:null,paid=pd2&&pd2.ps==='paid'||(e.k==='tp'&&/, paid$/.test(e.t));return e.k==='duty'&&pd2?`<button class='tip tipbtn' ${pd2.slot&&pd2.type==='uta'?`data-open='${CAL.sel}'`:`data-oe='${e.ix}'`}><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:e.k==='tp'?`<button class='tip tipbtn' data-open='${CAL.sel}'><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:`<div class='tip'>${esc(e.t)}</div>`}).join(''):`<p class='mute'>Nothing on this day.</p>`}
-  <p class='mute'>Tap any pay status above to change or remove it. Paid entries are locked until you change their pay status. Orders (AT, MPA, RPA, ADOS) span one day per unit.</p></div>`;
+  ${sel.length?sel.map(e=>{const pd2=e.k==='duty'?S.duty[e.ix]:null,paid=pd2&&pd2.ps==='paid'||(e.k==='tp'&&/, paid$/.test(e.t));return e.k==='duty'&&pd2?`<button class='tip tipbtn' ${pd2.slot&&pd2.type==='uta'?`data-open='${CAL.sel}'`:`data-oe='${e.ix}'`}><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:e.k==='tp'||e.k==='sp'?`<button class='tip tipbtn' data-open='${CAL.sel}'><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:`<div class='tip'>${esc(e.t)}</div>`}).join(''):`<p class='mute'>Nothing on this day.</p>`}
+  <p class='mute'>Tap any pay status above to change or remove it. Paid entries are locked until you change their pay status. Orders (AT, MPA, RPA, ADOS) span one day per unit.</p>
+  ${czPanel()}</div>`;
 }
 function quarterPanel(){
   const w=fyWindow(),t=today(),qi=d=>{const m=d.getMonth();return m>=9?0:Math.floor((m+3)/3)},z4=()=>[0,1,2,3].map(()=>({d:0,p:0}));
@@ -389,7 +404,7 @@ function dash(){
   <div class="panel"><div class="mute">Retirement points this year</div><div class="big">${st.total}<span class="mute"> / 50</span></div>
   <div class="bar"><i style="width:${pct(st.total)}%"></i><i class="planned" style="width:${Math.min(pct(st.plan),100-pct(st.total))}%"></i></div>
   <div class="mute">${S.member} membership + ${st.done} earned + ${st.plan} planned<br>${st.w.set?fmt(st.w.s)+" to "+fmt(st.w.e):"Set your anniversary date in Settings"}</div></div>
-  <div class="panel"><div class="mute">Duty pay earned</div><div class="big">${money(st.payD)}</div><div class="mute">Paid ${money(pt.paid)}<br>Submitted ${money(pt.submitted)}<br>Not submitted ${money(pt.none)}<br>${money(st.payP)} more planned</div></div>
+  <div class="panel"><div class="mute">Duty pay earned</div><div class="big">${money(st.payD)}</div><div class="mute">Paid ${money(pt.paid)}<br>Submitted ${money(pt.submitted)}<br>Not submitted ${money(pt.none)}<br>${money(st.payP)} more planned${st.ordD||st.ordP?`<br>Includes ${money(st.ordD)} from orders`:''}${st.spD?`<br>Includes ${money(st.spD)} HFP / IDP / HDP-L`:''}${st.free?`<br>${money(st.free)} of it tax-free`:''}</div></div>
   <div class="panel"><div class="mute">Currencies</div><div class="big">${S.curr.filter(c=>currInfo(c).left>=0).length}<span class="mute"> / ${S.curr.length} current</span></div><div class="mute">${S.curr.filter(c=>{const l=currInfo(c).left;return l>=0&&l<=30}).length} expiring within 30 days</div></div>
   ${(()=>{const r=retCalc();return `<div class="panel"><div class="mute">Estimated retirement pay</div>${r.set?`<div class="big">${money(r.moNow)}<span class="mute"> / mo</span></div><div class="mute">${r.now.toLocaleString()} points (${r.yrs.toFixed(2)} equivalent years)<br>${st.plan?`${money(r.moFut)} / mo with ${st.plan} planned points<br>`:''}${r.pl[0]==='brs'?'BRS 2.0%':'High-3 2.5%'}, ${esc(r.g)} pay, today\u2019s dollars</div>`:`<div class="big">\u2014</div><div class="mute">Enter your career points and retirement system in Settings.</div>`}</div>`})()}
   <div class="panel"><div class="mute">Travel vouchers waiting</div><div class="big">${money(vt.submitted)}</div><div class="mute">${money(vt.draft)} in draft<br>${money(vt.paid)} paid</div></div></div>
@@ -469,7 +484,7 @@ function setSlot(id,kind,patch){
   applySlot(id,kind);save();render();
 }
 const hrs=(a,b)=>{if(!a||!b)return null;const m=x=>{const[h,n]=x.split(':').map(Number);return h*60+n};let d=m(b)-m(a);if(d<=0)d+=1440;return d/60};
-function cellHtml(ev,day){const us=[],ls=[],ds=[],bs=[];ev.forEach(e=>{if(e.bn)bs.push(e.bn);else if(e.u)us.push({c:e.c,t:e.u.m+' P'+e.u.p,tm:e.tm});else if(e.s)ls.push({c:e.c,t:e.s,tm:e.tm});else ds.push(e.c)});
+function cellHtml(ev,day){const us=[],ls=[],ds=[],bs=[];ev.forEach(e=>{if(e.nocell)return;if(e.bn)bs.push(e.bn);else if(e.u)us.push({c:e.c,t:e.u.m+' P'+e.u.p,tm:e.tm});else if(e.s)ls.push({c:e.c,t:e.s,tm:e.tm});else ds.push(e.c)});
   us.sort((x,y)=>x.t<y.t?-1:x.t>y.t?1:0);const all=[...us,...ls];
   const bo={bad:0,warn:1,ok:2};bs.sort((x,y)=>bo[x.v]-bo[y.v]);const bh=bs.length?`<span class='cbns'>${bs.slice(0,2).map(b=>`<span class='cbn ${b.v}' title='${esc(b.n)} due'>${esc(b.n)}</span>`).join('')}${bs.length>2?`<span class='cbn more'>+${bs.length-2} more due</span>`:''}</span>`:'';
   return `<span class='ctop'><span>${day}</span>${bh}</span>`+all.slice(0,bs.length?3:4).map(l=>`<span class='ev'><i class='dot ${l.c}'></i><span>${esc(l.t)}</span>${l.tm?`<span class='tm'>${esc(l.tm)}</span>`:''}</span>`).join('')+(all.length>(bs.length?3:4)?`<span class='ev'>+${all.length-(bs.length?3:4)} more</span>`:'')+(ds.length?`<span class='dots'>${ds.slice(0,4).map(c=>`<i class='dot ${c}'></i>`).join('')}</span>`:'')}
@@ -497,6 +512,15 @@ function tpLog(){
 }
 function migrate(){
   let ch=false;
+  /* duty types are fixed: 1 point per period or day; everything paid except points-only */
+  {const fx=JSON.stringify(DEF.types);if(JSON.stringify(S.types)!==fx){S.types=JSON.parse(fx);ch=true}}
+  /* earlier versions kept HFP/IDP, HDP-L and combat zone on each order: move them to the dates and months */
+  S.duty.forEach(d=>{const o=d.op;if(!o||!('hf' in o||'hdp' in o||'cz' in o))return;const n=ordSpan(d);
+    for(let i=0;i<n;i++){const k=iso(addDays(pd(d.date),i));if(o.hf==='hfp'){S.hfp=S.hfp||{};S.hfp[k.slice(0,7)]=1}if(o.hf==='idp'||+o.hdp){S.sp=S.sp||{};S.sp[k]={idp:o.hf==='idp'?1:0,hdp:String(o.hdp||'0')}}if(+o.cz){S.czte=S.czte||{};S.czte[k.slice(0,7)]=1}}
+    delete o.hf;delete o.hdp;delete o.cz;ch=true});
+  Object.entries(S.sp||{}).forEach(([k,v])=>{if(!('hf' in v))return;if(v.hf==='idp')v.idp=1;if(v.hf==='hfp'){S.hfp=S.hfp||{};S.hfp[k.slice(0,7)]=1}delete v.hf;if(!v.idp&&!+v.hdp)delete S.sp[k];ch=true});
+  if(S.op&&'oe' in S.op){if(+S.op.oe&&/^O-[123]$/.test(S.grade||''))S.grade+='E';delete S.op.oe;ch=true}
+  if(S.op&&('hf' in S.op||'hdp' in S.op||'cz' in S.op)){delete S.op.hf;delete S.op.hdp;delete S.op.cz;ch=true}
   if(S.slots)Object.keys(S.slots).forEach(k=>{let m;
     if(/^uta-\d+-\d+$/.test(k)){
       const sd=S.slots[k];S.duty=S.duty.filter(d=>d.slot!==k);delete S.slots[k];ch=true;
@@ -572,7 +596,7 @@ function duty(){
   <div class="panel"><h2>Orders</h2><div class="row" style="align-items:center"><div style="flex:0 0 auto"><button class="btn" id="addord">+ Add orders</button></div>
   <p class="mute" style="flex:3 1 260px;margin:0">For annual tour (AT), MPA, RPA, ADOS / ADT / school and points-only days. Only AT counts toward the 15-day annual tour; MPA, RPA and ADOS count as man days. You can also add orders from a day on the calendar. Tap Edit on any entry below to change or remove it.</p></div></div>
   <div class="panel tbl"><table><thead><tr><th>Date</th><th>Status</th><th>Units</th><th>Points</th><th>Pay amount</th><th>Pay status</th><th></th></tr></thead><tbody>
-  ${rows.map(d=>{const ty=T(d.type),fut=pd(d.date)>today();return `<tr><td>${fmt(d.date)} ${fut?'<span class="tag plan">Planned</span>':""}</td><td>${esc(ty.name)}<div class="mute">${esc(d.note)}${d.memo?' · '+esc(d.memo):''}</div><div class="row" style="gap:4px;margin-top:4px;flex-wrap:nowrap"><div style="flex:0 0 auto"><input type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="HHMM" class="t24" data-tm="${d.i}|start" value="${t24v(d.start)}" style="width:76px" aria-label="Start time"></div><div style="flex:0 0 auto"><input type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="HHMM" class="t24" data-tm="${d.i}|end" value="${t24v(d.end)}" style="width:76px" aria-label="End time"></div></div>${hrs(d.start,d.end)?`<div class="mute">${hrs(d.start,d.end).toFixed(1)} h</div>`:""}</td><td>${d.units}</td><td>${ty.pts*d.units}</td><td><input type="number" min="0" step="0.01" data-man="${d.i}" value="${hasManual(d)?d.manual:""}" placeholder="${(ty.paid?S.rate*d.units:0).toFixed(2)}" style="width:100px" aria-label="Pay amount, blank uses calculated"></td><td><select data-ps="${d.i}" style="width:auto" aria-label="Pay status">${PS.map(([k,n])=>`<option value="${k}" ${(d.ps||"none")===k?"selected":""}>${n}</option>`).join("")}</select>${d.ps==="submitted"&&d.sdate?`<div class="mute">${ageTxt(d.sdate)}</div>`:""}</td><td style="white-space:nowrap"><button class="btn ghost sm" ${d.type==='uta'&&d.slot?`data-open="${d.date}"`:`data-oe="${d.i}"`} aria-label="${d.ps==='paid'?'View':'Edit'} entry">${d.ps==='paid'?'View':'Edit'}</button> <button class="btn ghost sm" data-del="${d.i}" aria-label="Delete entry" ${d.ps==='paid'?'disabled title="Paid entries are locked. Change the pay status to delete."':''}>Delete</button></td></tr>`}).join("")||`<tr><td colspan="7" class="mute">No duty logged yet. Right-click a day on the calendar to add UTA periods, or add orders above.</td></tr>`}
+  ${rows.map(d=>{const ty=T(d.type),fut=pd(d.date)>today();return `<tr><td>${fmt(d.date)} ${fut?'<span class="tag plan">Planned</span>':""}</td><td>${esc(ty.name)}<div class="mute">${esc(d.note)}${d.memo?' · '+esc(d.memo):''}</div><div class="row" style="gap:4px;margin-top:4px;flex-wrap:nowrap"><div style="flex:0 0 auto"><input type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="HHMM" class="t24" data-tm="${d.i}|start" value="${t24v(d.start)}" style="width:76px" aria-label="Start time"></div><div style="flex:0 0 auto"><input type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="HHMM" class="t24" data-tm="${d.i}|end" value="${t24v(d.end)}" style="width:76px" aria-label="End time"></div></div>${hrs(d.start,d.end)?`<div class="mute">${hrs(d.start,d.end).toFixed(1)} h</div>`:""}</td><td>${d.units}</td><td>${ty.pts*d.units}</td><td><input type="number" min="0" step="0.01" data-man="${d.i}" value="${hasManual(d)?d.manual:""}" placeholder="${calcPay(d).toFixed(2)}" style="width:100px" aria-label="Pay amount, blank uses calculated">${ordPaid(d.type)?(()=>{const c=ordCalc(d),t=c.tot;return `<div class="mute" style="font-size:12px;white-space:nowrap">Basic ${money(t.basic)}${t.fp?' · flight '+money(t.fp):''}${t.bah?'<br>'+(c.bahT==='rc'?'BAH RC/T ':'BAH ')+money(t.bah):''}${t.bas?' · BAS '+money(t.bas):''}${t.free?'<br>'+money(t.free)+' tax-free':''}</div>`})():''}</td><td><select data-ps="${d.i}" style="width:auto" aria-label="Pay status">${PS.map(([k,n])=>`<option value="${k}" ${(d.ps||"none")===k?"selected":""}>${n}</option>`).join("")}</select>${d.ps==="submitted"&&d.sdate?`<div class="mute">${ageTxt(d.sdate)}</div>`:""}</td><td style="white-space:nowrap"><button class="btn ghost sm" ${d.type==='uta'&&d.slot?`data-open="${d.date}"`:`data-oe="${d.i}"`} aria-label="${d.ps==='paid'?'View':'Edit'} entry">${d.ps==='paid'?'View':'Edit'}</button> <button class="btn ghost sm" data-del="${d.i}" aria-label="Delete entry" ${d.ps==='paid'?'disabled title="Paid entries are locked. Change the pay status to delete."':''}>Delete</button></td></tr>`}).join("")||`<tr><td colspan="7" class="mute">No duty logged yet. Right-click a day on the calendar to add UTA periods, or add orders above.</td></tr>`}
   </tbody></table></div>`;
 }
 const C5UI={msg:'',basis:'day'};
@@ -639,6 +663,10 @@ const PAY={'E-1':[2407.2],'E-2':[2697.9],'E-3':[2836.8,3015,3198],'E-4':[3142.2,
 'W-5':[...z(11),10169.7,10685.7,11070.3,11495.1,11495.1,12070.8,12673.5,13308.3],
 'O-1':[4150.2,4320,5222.4],'O-2':[4782,5446.2,6272.4,6484.5,6617.7],
 'O-3':[5534.1,6273.9,6770.4,7382.7,7737,8125.5,8375.7,8788.2,9004.2],
+/* O-1E to O-3E: commissioned officers with over 4 years of active enlisted or warrant service (DFAS, Jan 1, 2026) */
+'O-1E':[...z(3),5222.4,5576.7,5783.1,5993.7,6200.7,6484.5],
+'O-2E':[...z(3),6484.5,6617.7,6828,7183.8,7458.9,7663.5],
+'O-3E':[...z(3),7382.7,7737,8125.5,8375.7,8788.2,9137.1,9336.9,9609.6],
 'O-4':[6294.6,7286.4,7773.6,7881,8332.2,8816.4,9420,9888.3,10214.4,10401.6,10509.9],
 'O-5':[7295.4,8218.2,8787,8894.1,9249.6,9461.4,9928.5,10271.7,10715.1,11391.3,11713.8,12032.7,12394.8],
 'O-6':[8751.3,9613.8,10245,10245,10284.3,10725,10783.5,10783.5,11396.4,12479.7,13115.4,13751.1,14112.9,14479.2,15188.7,15188.7,15408.3],
@@ -683,9 +711,177 @@ function pay(){
   <div><div class='mute'>UTA weekend (4 periods)</div><div class='big' style='font-size:22px'>${money(m*4/30)}</div></div>
   <div><div class='mute'>14-day AT</div><div class='big' style='font-size:22px'>${money(m*14/30)}</div></div></div>
   <div class='row' style='margin-top:12px'><div style='flex:0 0 auto'><button class='btn' id='usepay'>Use ${money(m/30)} as my daily rate</button></div><div class='mute'>Saved daily rate: ${S.rate?money(S.rate):'not set'}</div></div>
-  <p class='mute'>2026 rates, effective January 1, 2026. One drill period is 1/30 of monthly basic pay and a UTA weekend is 4 periods. Years of service are the cumulative years counted for pay. E-1 under 4 months is $2,225.70, and the O-1E to O-3E rates aren’t included. No 2027 table has been published yet. Confirm against your LES or the <a href='https://www.dfas.mil/militarymembers/payentitlements/Pay-Tables/' target='_blank' rel='noopener'>DFAS pay tables</a>.</p></div>
+  <p class='mute'>2026 rates, effective January 1, 2026. One drill period is 1/30 of monthly basic pay and a UTA weekend is 4 periods. Years of service are the cumulative years counted for pay. E-1 under 4 months is $2,225.70. O-1E to O-3E are for commissioned officers with over 4 years of active enlisted or warrant service (<a href='https://www.dfas.mil/militarymembers/payentitlements/Pay-Tables/Basic-Pay/CO_FE' target='_blank' rel='noopener'>DFAS table</a>). No 2027 table has been published yet. Confirm against your LES or the <a href='https://www.dfas.mil/militarymembers/payentitlements/Pay-Tables/' target='_blank' rel='noopener'>DFAS pay tables</a>.</p></div>
   ${flightPanel(m)}
   <div class='panel tbl'><h2>All grades, monthly basic pay (rounded to the dollar)</h2><table class='pt'><thead><tr><th>Grade</th>${COLS.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${Object.keys(PAY).map(k=>`<tr><td>${k}</td>${COLS.map((_,i)=>{const v=pv(k,i);return `<td class='${k===g&&i===ci?'sel':''}'>${v?Math.round(v).toLocaleString():'–'}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+/* ---------- Orders pay, prorated by DoD FMR Vol 7A ----------
+   Orders under 30 days: 1/30 of the monthly rate for every day, 31st included.
+   Orders of 30 days or more: 30-day months. The 31st isn't paid, and serving through the end of February counts as 30 days.
+   BAH: orders of 30 days or fewer get BAH RC/T (non-locality, "Type II"); orders of more than 30 days get locality BAH.
+   Special pay (HFP, IDP, HDP-L) is marked per date on the calendar. CZTE is set per calendar month. */
+const BAS26={off:328.48,enl:476.95};
+/* 2026 non-locality BAH (BAH RC/T), effective Jan 1, 2026, travel.dod.mil: [without dependents, with dependents] */
+const BAHRC={'O-10':[2466.3,3035.1],'O-9':[2466.3,3035.1],'O-8':[2466.3,3035.1],'O-7':[2466.3,3035.1],'O-6':[2261.7,2731.8],'O-5':[2178,2633.4],'O-4':[2017.8,2320.8],'O-3':[1618.2,1920.3],'O-2':[1281.9,1638.3],'O-1':[1100.7,1466.7],'O-3E':[1746.6,2063.7],'O-2E':[1485.3,1862.4],'O-1E':[1291.8,1721.4],'W-5':[2051.4,2241.3],'W-4':[1821.3,2054.7],'W-3':[1531.2,1883.4],'W-2':[1359,1730.7],'W-1':[1139.4,1497.9],'E-9':[1494.9,1971.6],'E-8':[1374.3,1818.3],'E-7':[1265.7,1687.2],'E-6':[1169.7,1559.1],'E-5':[1052.7,1403.7],'E-4':[915.6,1219.5],'E-3':[850.5,1133.7],'E-2':[811.5,1080.6],'E-1':[811.5,1080.6]};
+/* senior enlisted advisor basic pay, 2026: the base of the officer combat zone tax exclusion cap */
+const SEA26=11166.9;
+/* HFP / IDP / HDP-L rates by date: new rates from October 1, 2026 */
+const HFR=D=>D>='2026-10-01'?{hfp:450,idp:275,idpd:9.16,hdpMax:100}:{hfp:225,idp:225,idpd:7.5,hdpMax:150};
+const OPD={dep:'0',oe:0,lwo:'',lw:'',zip:'',bah:1,bas:1,fp:1,tax:''};
+const OP=()=>Object.assign({},OPD,S.op||{});
+/* the per-order choices: saved on the order, otherwise the Settings defaults */
+const OPO=['bah','bas'];
+const ordOpts=d=>{const o=OP(),x=(d&&d.op)||{},r={};OPO.forEach(k=>r[k]=k in x?x[k]:o[k]);return r};
+const ordPaid=t=>ORD.includes(t)&&t!=='pts'&&!!T(t).paid;
+const opGrade=()=>PAY[S.grade]?S.grade:'';
+const isOff=g=>/^O-/.test(g);
+const bahGrade=()=>opGrade();
+/* 30-day-month weight for one day of a period that runs 30 days or more */
+const w30=k=>{const x=pd(k),day=x.getDate(),last=eomOf(x).getDate();return day===31?0:last<30&&day===last?31-last:1};
+/* pay with no tax split: gross never depends on CZTE */
+function ordRaw(d){
+  const o=OP(),x=ordOpts(d),n=ordSpan(d),long=n>=30,s=pd(d.date),g=opGrade(),dep=+o.dep?1:0;
+  const basicM=g?curPay().m:(S.rate||0)*30,fpM=g&&+o.fp?fpMonthly():0;
+  const bahT=n>30?'loc':'rc',rc=(BAHRC[bahGrade()]||[0,0])[dep];let bahM=0,warn=[];
+  if(g&&+x.bah){if(bahT==='loc'){const v=Number(dep?o.lw:o.lwo);if(v>0)bahM=v;else{bahM=rc;warn.push(`No locality BAH is set in Settings, so BAH RC/T is used for these ${n}-day orders.`)}}else bahM=rc}
+  const basM=g&&+x.bas?(isOff(g)?BAS26.off:BAS26.enl):0,days=[];
+  for(let i=0;i<n;i++){const k=iso(addDays(s,i)),w=long?w30(k):1;days.push({k,w,basic:basicM/30*w,fp:fpM/30*w,bah:bahM/30*w,bas:basM/30*w,ex:0})}
+  if(!g)warn.push('Set your pay grade in the basic pay lookup to add BAH and BAS. Until then only basic pay at your daily rate is counted.');
+  return{n,long,bahT,bahM,basM,basicM,fpM,dep,g,days,warn,tot:ordSum(days)};
+}
+/* with the CZTE share for each combat zone month */
+function ordCalc(d){const c=ordRaw(d),cz=new Set();c.days.forEach(r=>{const m=r.k.slice(0,7),f=czFrac(m);if(f!==null){r.ex=(r.basic+r.fp)*f;cz.add(m)}});c.cz=[...cz];c.tot=ordSum(c.days);return c}
+function ordSum(days,a,b){const t={basic:0,fp:0,bah:0,bas:0,ex:0,w:0};days.forEach(r=>{if(a&&r.k<a||b&&r.k>b)return;for(const k in t)t[k]+=r[k]||0});
+  t.gross=t.basic+t.fp+t.bah+t.bas;t.taxable=t.basic+t.fp-t.ex;t.free=t.bah+t.bas+t.ex;const r=Number(OP().tax)||0;t.tax=r?t.taxable*r/100:0;t.net=t.gross-t.tax;return t}
+/* calculated pay, ignoring any amount typed in */
+const calcPay=d=>ordPaid(d.type)?ordRaw(d).tot.gross:(T(d.type).paid?d.units*S.rate:0);
+/* pay for the part of an entry that falls between two dates (inclusive). Orders are split day by day */
+function dutyPayIn(d,a,b){
+  if(d.rs==='pts')return 0;
+  if(!ordPaid(d.type)||ordSpan(d)<=1){if(ORD.includes(d.type)&&!ordPaid(d.type)&&!hasManual(d))return 0;return d.date>=a&&d.date<=b?dutyPay(d):0}
+  const c=ordRaw(d);if(hasManual(d)){const W=c.tot.w||c.n;return W?Number(d.manual)*ordSum(c.days,a,b).w/W:0}
+  return ordSum(c.days,a,b).gross;
+}
+
+/* ---------- Special pay ----------
+   HFP: a checkbox per calendar month (S.hfp[YYYY-MM]). The full monthly rate for the month, never prorated. 37 USC 351; FMR 7A ch 10.
+   IDP: a checkbox per date (S.sp[date].idp). The daily rate for each day in the area, up to the monthly rate (full rate for a full month).
+   HFP and IDP can't both be paid in one month, so HFP replaces IDP that month.
+   HDP-L: set per date in the day editor (S.sp[date].hdp). 1/30 of the monthly rate per day, but on TDY only after more than
+   30 consecutive days, then back to day 1. Held to $100 a month alongside HFP or IDP. FMR 7A ch 17.
+   All of them need a day you're entitled to basic pay: paid orders, a UTA period, or an FTP or GTP. */
+const HDO=['0','50','100','150'];
+let SPC=null,CZC={};
+const spReset=()=>{SPC=null;CZC={}};
+const hfpOn=m=>!!(S.hfp||{})[m];
+function onDuty(k){const t=(S.tpd||{})[k];return !!(t&&(t.ftp||0)+(t.gtp||0))||S.duty.some(d=>(ordPaid(d.type)&&ordOn(d,k))||(d.type==='uta'&&d.date===k&&d.rs!=='pts'))}
+function spRuns(L){const R=[];L.forEach(k=>{const r=R[R.length-1];if(r&&iso(addDays(pd(r[r.length-1]),1))===k)r.push(k);else R.push([k])});return R}
+function spCalc(){
+  if(SPC)return SPC;
+  const sp=S.sp||{},D=Object.keys(sp).sort(),out={d:{},m:{},st:{},hfm:{}};
+  const mo=m=>out.m[m]=out.m[m]||{hf:0,hdp:0,hft:'',hfd:''};
+  const put=(k,f,v)=>{(out.d[k]=out.d[k]||{hf:0,hdp:0})[f]+=v;mo(k.slice(0,7))[f]+=v};
+  const el=D.filter(onDuty);D.filter(k=>!el.includes(k)).forEach(k=>out.st[k]='Not payable: no pay status on this day.');
+  /* HFP: whole month, paid once */
+  Object.keys(S.hfp||{}).forEach(m=>{const a=pd(m+'-01');let k='';for(let x=a;x.getMonth()===a.getMonth();x=addDays(x,1))if(onDuty(iso(x))){k=iso(x);break}
+    if(k){put(k,'hf',HFR(k).hfp);mo(m).hft='hfp';mo(m).hfd=k}else out.hfm[m]='No pay status is logged this month yet, so HFP isn’t counted. It needs at least one day of orders, a UTA period, or an FTP or GTP.'});
+  /* IDP: per day, capped at the monthly rate; none in an HFP month */
+  const I0=el.filter(k=>sp[k].idp),long=new Set(spRuns(I0).filter(r=>r.length>=30).flat()),byM={},w=k=>long.has(k)?w30(k):1;
+  I0.forEach(k=>(byM[k.slice(0,7)]=byM[k.slice(0,7)]||[]).push(k));
+  Object.entries(byM).forEach(([m,I])=>{
+    if(mo(m).hft==='hfp'){I.forEach(k=>out.st[k]='IDP isn’t paid this month because HFP is (they can’t both be paid).');return}
+    const R=HFR(I[0]),ws=I.reduce((a,k)=>a+w(k),0);mo(m).hft='idp';
+    if(ws>=30||I.length===eomOf(pd(I[0])).getDate())I.forEach(k=>put(k,'hf',R.idp*w(k)/ws));
+    else{let t=0;I.forEach(k=>{const v=Math.max(0,Math.min(R.idpd*w(k),R.idp-t));t+=v;put(k,'hf',v)})}});
+  /* HDP-L in runs of consecutive days */
+  spRuns(el.filter(k=>+sp[k].hdp>0)).forEach(r=>{
+    if(r.length<=30){r.forEach((k,i)=>out.st[k]=(out.st[k]?out.st[k]+' ':'')+`HDP-L not payable yet: day ${i+1} of ${r.length} in a row. It’s paid only after more than 30 consecutive days, then back to the first day.`);return}
+    const M={};r.forEach(k=>(M[k.slice(0,7)]=M[k.slice(0,7)]||[]).push(k));
+    Object.values(M).forEach(L=>{const R=HFR(L[0]),hf=(out.m[L[0].slice(0,7)]||{}).hf>0,rate=k=>Math.min(+sp[k].hdp,R.hdpMax,hf?100:1e9),ws=L.reduce((a,k)=>a+w30(k),0);
+      L.forEach(k=>put(k,'hdp',ws>=30?rate(k)*w30(k)/ws:rate(k)/30*w30(k)))})});
+  return SPC=out;
+}
+const spIn=(a,b)=>Object.entries(spCalc().d).reduce((s,[k,v])=>k>=a&&k<=b?s+v.hf+v.hdp:s,0);
+/* CZTE: any day in a combat zone makes the whole month's military pay tax-free; officers up to senior enlisted pay + HFP/IDP */
+const czOn=m=>!!(S.czte||{})[m];
+function czMonth(m){
+  if(!czOn(m))return null;if(CZC[m])return CZC[m];
+  const a=m+'-01',b=iso(eomOf(pd(a))),s=spCalc().m[m]||{hf:0,hdp:0};let tx=s.hf+s.hdp;
+  S.duty.forEach(d=>{if(ordPaid(d.type)&&!hasManual(d)&&ordSpan(d)>1){const t=ordSum(ordRaw(d).days,a,b);tx+=t.basic+t.fp}else tx+=dutyPayIn(d,a,b)});
+  const g=opGrade(),cap=g&&isOff(g)?SEA26+s.hf:Infinity,ex=Math.min(tx,cap);
+  return CZC[m]={tx,ex,cap,f:tx?ex/tx:1};
+}
+const czFrac=m=>{const c=czMonth(m);return c?c.f:null};
+/* tax-free pay between two dates: BAH, BAS and CZTE */
+function freeIn(a,b){let f=0;
+  S.duty.forEach(d=>{if(ordPaid(d.type)&&!hasManual(d)&&ordSpan(d)>1){f+=ordSum(ordCalc(d).days,a,b).free;return}const v=dutyPayIn(d,a,b);if(v){const c=czFrac(d.date.slice(0,7));if(c!==null)f+=v*c}});
+  Object.entries(spCalc().d).forEach(([k,v])=>{if(k<a||k>b)return;const c=czFrac(k.slice(0,7));if(c!==null)f+=(v.hf+v.hdp)*c});
+  return f}
+const BAHLBL={rc:'BAH RC/T (Type II)',loc:'Locality BAH'};
+function ordBreak(c,man){
+  const m=money,t=c.tot,row=(a,b,n)=>`<tr><td>${a}</td><td style='text-align:right'>${b}</td><td class='mute'>${n||''}</td></tr>`;
+  return `<div class='tbl'><table class='mini' style='width:100%'>
+  ${row('Basic pay',m(t.basic),`${t.w} paid day${t.w===1?'':'s'} × ${m(c.basicM/30)}`)}
+  ${t.fp?row('Flight pay',m(t.fp),`${m(c.fpM)}/mo ÷ 30`):''}
+  ${c.bahM?row(BAHLBL[c.bahT],m(t.bah),`${m(c.bahM)}/mo, ${c.dep?'with':'without'} dependents`):''}
+  ${c.basM?row('BAS',m(t.bas),`${m(c.basM)}/mo, ${isOff(c.g)?'officer':'enlisted'}`):''}
+  <tr style='font-weight:600'><td>Gross</td><td style='text-align:right'>${m(t.gross)}</td><td></td></tr>
+  ${row('Tax-free',m(t.free),`BAH and BAS${t.ex?' + '+m(t.ex)+' CZTE':''}`)}
+  ${t.tax?row('Estimated tax',m(-t.tax),`${OP().tax}% of ${m(t.taxable)} taxable`)+`<tr style='font-weight:600'><td>Estimated take-home</td><td style='text-align:right'>${m(t.net)}</td><td class='mute'>before FICA</td></tr>`:''}
+  </table></div>${c.cz&&c.cz.length?`<div class='mute'>Combat zone month${c.cz.length>1?'s':''}: ${c.cz.map(x=>pd(x+'-01').toLocaleDateString(undefined,{month:'short',year:'numeric'})).join(', ')}. Set under the calendar.</div>`:''}<div class='mute'>HFP, IDP and HDP-L are marked per day in the day editor and are counted separately.</div>${c.long?`<div class='mute'>Orders of 30 days or more are paid on 30-day months: the 31st isn’t paid, and a full February counts as 30 days.</div>`:''}${man?`<div class='mute'><b>Your typed pay amount (${m(Number(man))}) is used for the totals instead.</b> Clear it to use this calculation.</div>`:''}${c.warn.map(w=>`<p class='pw' style='color:var(--warn);background:var(--warnbg)'>${esc(w)}</p>`).join('')}`;
+}
+/* the CZTE checkbox and month summary under the calendar */
+function czPanel(){
+  const m=CAL.y+'-'+String(CAL.m+1).padStart(2,'0'),on=czOn(m),hf=hfpOn(m),mn=new Date(CAL.y,CAL.m,1).toLocaleDateString(undefined,{month:'short',year:'numeric'}),c=czMonth(m),sc=spCalc(),s=sc.m[m],g=opGrade(),R=HFR(m+'-01');
+  const box=(id,on,t,tip,note)=>`<div style='flex:1 1 220px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg)'><label style='display:flex;gap:6px;align-items:center;color:var(--ink);font-size:13px;margin:0' title='${esc(tip)}'><input type='checkbox' id='${id}' style='width:auto;margin:0' ${on?'checked':''}><b style='font-weight:600'>${t}</b></label>${note?`<div class='mute' style='font-size:12px;margin-top:2px'>${note}</div>`:''}</div>`;
+  return `<div style='margin-top:12px;border-top:1px solid var(--line);padding-top:10px'><div class='mute' style='font-size:12px;margin-bottom:5px'>Whole-month pay for ${mn}</div><div style='display:flex;gap:8px;flex-wrap:wrap'>
+  ${box('czm',on,'Combat zone (CZTE)','One day in a combat zone makes the whole month’s military pay tax-free.',on?`${money(c.ex)} of ${money(c.tx)} tax-free${g&&isOff(g)?` (officer cap ${money(c.cap)})`:''}`:'')}
+  ${box('hfm',hf,`Hostile fire pay (${money(R.hfp)})`,'The full monthly rate for any month you qualify. Not prorated. Replaces IDP that month.',hf?(sc.hfm[m]?`<span style='color:var(--warn)'>No pay status this month yet, so it isn’t counted.</span>`:'Full month, replaces IDP'):'')}</div>
+  <p class='mute' style='font-size:12px;margin:6px 0 0'>IDP: tick the box in a day’s top-right corner (${money(R.idpd)}/day, up to ${money(R.idp)}/mo).${s&&(s.hf||s.hdp)?` This month: ${s.hf?(s.hft==='hfp'?'HFP ':'IDP ')+money(s.hf):''}${s.hf&&s.hdp?', ':''}${s.hdp?'HDP-L '+money(s.hdp):''}.`:''}</p></div>`;
+}
+/* special pay section of the day editor */
+function spEdHtml(D){
+  const v=(S.sp||{})[D]||{},c=spCalc(),a=c.d[D],st=c.st[D],m=c.m[D.slice(0,7)]||{};
+  return `<div class='mute' style='margin:12px 0 4px'>IDP and HDP-L</div>
+  <div class='row' style='gap:8px;align-items:end'><div style='flex:1 1 120px'><label style='display:flex;gap:6px;align-items:center;color:var(--ink);font-size:14px;margin:0 0 10px'><input type='checkbox' id='edidp' style='width:auto' ${v.idp?'checked':''}>IDP</label></div>
+  <div style='flex:1 1 110px'><label for='edhdp'>HDP-L ($/mo)</label><select id='edhdp'>${HDO.map(x=>`<option value='${x}' ${String(v.hdp||'0')===x?'selected':''}>${x==='0'?'None':'$'+x}</option>`).join('')}</select></div>
+  <div style='flex:1 1 140px'><label for='edthru'>Through</label><input type='date' id='edthru' value='${D}' min='${D}'></div></div>
+  <div class='row' style='margin-top:6px;gap:8px;align-items:center'><div style='flex:0 0 auto'><button class='btn ghost' id='edsp'>Apply</button></div><div style='flex:0 0 auto'><button class='btn ghost' id='edspc'>Clear</button></div><div class='mute' id='edspm' style='flex:2 1 160px'></div></div>
+  <p class='mute' style='margin:6px 0 0'>${a&&(a.hf||a.hdp)?`This day: ${a.hf?money(a.hf)+' '+(m.hft==='hfp'?'HFP (full month)':'IDP'):''}${a.hf&&a.hdp?', ':''}${a.hdp?money(a.hdp)+' HDP-L':''}. `:''}${st?`<span style='color:var(--warn)'>${esc(st)}</span> `:''}Set “Through” to mark a whole deployment at once; days with no pay status are skipped. HDP-L on orders starts after more than 30 days in a row, back to day 1. HFP is set for the whole month under the calendar.</p>`;
+}
+function spBind(D){
+  const ap=$('#edsp');if(!ap)return;
+  const go=clr=>{const idp=clr?0:($('#edidp').checked?1:0),hdp=clr?'0':$('#edhdp').value,e=$('#edthru').value||D;if(!S.sp)S.sp={};let n=0,sk=0;
+    for(let x=pd(D),i=0;iso(x)<=e&&i<400;x=addDays(x,1),i++){const k=iso(x);if(!clr&&!onDuty(k)&&k!==D){sk++;continue}if(idp||+hdp){S.sp[k]={idp,hdp};n++}else{delete S.sp[k];n++}}
+    save();render();edRender();const mm=$('#edspm');if(mm)mm.textContent=`${clr?'Cleared':'Marked'} ${n} day${n===1?'':'s'}${sk?`, skipped ${sk} with no pay status`:''}.`};
+  ap.onclick=()=>go(false);$('#edspc').onclick=()=>go(true);
+}
+function ordPayPanel(){
+  const o=OP(),g=opGrade(),bg=bahGrade(),dep=+o.dep?1:0,rc=BAHRC[bg]||[0,0],R=HFR(iso(today())),ex=n=>{if(!g&&!S.rate)return '—';const c=ordRaw({type:'ados',date:iso(today()),units:n});return money(c.tot.gross)};
+  const cell=(v,on)=>`<td class='${on?'on':''}'>${money(v)}</td>`,ck=(k,l)=>`<label style='display:inline-flex;gap:6px;align-items:center;color:var(--ink);font-size:14px;margin-right:14px'><input type='checkbox' data-op='${k}' ${+o[k]?'checked':''} style='width:auto'>${l}</label>`;
+  return `<div class='panel'><h2>Orders pay (prorated)</h2>
+  <p class='mute' style='margin:0 0 10px'>AT, MPA, RPA and ADOS / ADT / school orders are priced day by day from these settings, ${g?`using <b style='color:var(--ink)'>${esc(g)}, ${esc(colLabel(curPay().ci).toLowerCase())} years</b> from the basic pay lookup below (${money(curPay().m)}/mo basic pay)`:`but <b style='color:var(--bad)'>no pay grade is set yet</b>. Pick one in the basic pay lookup below`}. A pay amount typed on an order still overrides the calculation.</p>
+  <div class='row'><div><label for='opdep'>Dependents</label><select id='opdep' data-op='dep'><option value='0' ${dep?'':'selected'}>Without dependents</option><option value='1' ${dep?'selected':''}>With dependents</option></select></div>
+  ${g&&/^O-[123]$/.test(g)?`<div class='mute' style='flex:2 1 220px;align-self:end'>Over 4 years of prior enlisted or warrant service? Pick ${esc(g)}E in the basic pay lookup for the right basic pay and BAH.</div>`:''}</div>
+  <h2 style='margin:14px 0 6px;font-size:15px'>BAH</h2>
+  <div class='tbl'><table class='mini'><tr><th></th><th>Without dependents</th><th>With dependents</th></tr>
+  <tr><th>BAH RC/T (Type II), orders of 30 days or fewer${bg?', '+esc(bg):''}</th>${cell(rc[0],!dep)}${cell(rc[1],dep)}</tr>
+  <tr><th>Locality BAH, orders of 31 days or more</th><td><input type='number' min='0' step='0.01' data-op='lwo' value='${esc(o.lwo)}' placeholder='$/mo' style='width:110px' aria-label='Locality BAH without dependents'></td><td><input type='number' min='0' step='0.01' data-op='lw' value='${esc(o.lw)}' placeholder='$/mo' style='width:110px' aria-label='Locality BAH with dependents'></td></tr></table></div>
+  <div class='row' style='margin-top:6px'><div style='flex:0 1 200px'><label for='opzip'>Primary residence ZIP (for your reference)</label><input id='opzip' data-op='zip' inputmode='numeric' maxlength='5' value='${esc(o.zip)}' placeholder='e.g. 95687'></div>
+  <div class='mute' style='flex:3 1 260px;align-self:end'>Locality BAH is set by the ZIP code of your primary residence when the orders were issued. Look up your ${esc(bg||'grade')} rates on the <a href='https://www.travel.dod.mil/Allowances/Basic-Allowance-for-Housing/BAH-Rate-Lookup/' target='_blank' rel='noopener'>DoD BAH calculator</a> and enter both.</div></div>
+  <h2 style='margin:14px 0 6px;font-size:15px'>BAS</h2>
+  <div class='tbl'><table class='mini'><tr><th>Officer</th><th>Enlisted</th></tr><tr>${cell(BAS26.off,g&&isOff(g))}${cell(BAS26.enl,g&&!isOff(g))}</tr></table></div>
+  <h2 style='margin:14px 0 6px;font-size:15px'>Include on orders</h2>
+  <div>${ck('bah','BAH')}${ck('bas','BAS')}${ck('fp',`Flight pay${fpMonthly()?' ('+money(fpMonthly())+'/mo)':' (none set)'}`)}</div>
+  <h2 style='margin:14px 0 6px;font-size:15px'>Special pay and taxes</h2>
+  <p class='mute' style='margin:0 0 6px'>On the Duty log calendar: tick <b>IDP</b> in the top-right corner of each day you were in an imminent danger area, and tick <b>Combat zone (CZTE)</b> and <b>Hostile fire pay (HFP)</b> under the calendar for the whole month. HDP-L is set per day in the day editor (right-click or press and hold a day).</p>
+  <div class='row'><div style='flex:0 1 260px'><label for='optax'>Estimated income tax rate (%)</label><input type='number' id='optax' data-op='tax' min='0' max='60' step='0.1' value='${esc(o.tax)}' placeholder='Blank = don’t estimate'></div></div>
+  <div class='tbl' style='margin-top:8px'><table class='mini'><tr><th></th><th>Through Sep 30, 2026</th><th>From Oct 1, 2026</th></tr>
+  <tr><th>Imminent danger pay (per day, monthly cap)</th><td${R.idp===225?" class='on'":''}>$7.50/day, $225/mo</td><td${R.idp===275?" class='on'":''}>$9.16/day, $275/mo</td></tr>
+  <tr><th>Hostile fire pay (full month)</th><td${R.hfp===225?" class='on'":''}>$225/mo</td><td${R.hfp===450?" class='on'":''}>$450/mo</td></tr>
+  <tr><th>HDP-L top rate</th><td${R.hdpMax===150?" class='on'":''}>$150/mo</td><td${R.hdpMax===100?" class='on'":''}>$100/mo</td></tr></table></div>
+  <div class='grid' style='margin-top:14px'>${[['15-day orders',15],['30-day orders',30],['45-day orders',45]].map(([l,n])=>`<div><div class='mute'>${l} starting today</div><div class='big' style='font-size:20px'>${ex(n)}</div></div>`).join('')}</div>
+  <p class='mute'>How it’s calculated (DoD FMR Volume 7A): pay and allowances are 1/30 of the monthly rate per day. Orders under 30 days are paid for every day, including the 31st. Orders of 30 days or more are paid on 30-day months, so the 31st isn’t paid and serving through the end of February counts as 30 days. Orders of 30 days or fewer get BAH RC/T; orders of more than 30 days get locality BAH for your primary residence. IDP is paid for each day in the area up to the monthly rate (chapter 10). HFP is the full monthly rate for any month you qualify and is never prorated; HFP and IDP can’t both be paid in the same month. HDP-L is 1/30 of the monthly rate per day; on temporary duty it’s paid only after more than 30 consecutive days, then back to the first day, and is held to $100 a month alongside HFP or IDP (chapter 17). Special pay counts only on days with a pay status: paid orders, a UTA period, or an FTP or GTP. CZTE works by calendar month: one day in a combat zone makes that month’s military pay tax-free, all of it for enlisted and warrant officers, and up to ${money(SEA26)} (senior enlisted basic pay) plus HFP or IDP for officers. BAH and BAS are always tax-free. The tax estimate is one flat rate on taxable pay and leaves out FICA. Rates: <a href='https://www.travel.dod.mil/Portals/119/Documents/BAH/PDF_Non-Locality-BAH-Rates/2026-Non-Locality-BAH-Rates.pdf' target='_blank' rel='noopener'>2026 non-locality BAH</a> (Jan 1, 2026) and <a href='https://militarypay.defense.gov/PAY/ALLOWANCES/bas.aspx' target='_blank' rel='noopener'>2026 BAS</a>. The 2027 tables aren’t published yet, so 2027 dates use 2026 rates.</p></div>`;
 }
 /*@@RATES@@*/
 const GSA_FY=2027;
@@ -817,11 +1013,13 @@ function payRows(){
     out.push({date:d.date,type:d.type==='uta'&&d.slot?'UTA period':ty.name,period:d.type==='uta'&&d.slot?utaLbl(d.slot):(ty.unit==='day'?d.units+' day(s)':d.units+' period(s)'),start:d.start||'',end:d.end||'',hours:h?h.toFixed(1):'',points:ty.pts*d.units,pay:dutyPay(d),received:'',reason:d.type==='uta'?RSN('uta',d.rs||(d.slot?'uta':'')):'',status:psName(d.ps),sdate:d.sdate||'',pdate:d.pdate||'',note:d.memo||(d.slot?'':d.note)||''})});
   if(f.tp)tpItems().forEach(x=>{if(!inR(x.date)||!psOk(x.ps||'none'))return;const h=hrs(x.start,x.end);
     out.push({date:x.date,type:x.k==='ftp'?'FTP (flying)':'GTP (ground)',period:'',start:x.start||'',end:x.end||'',hours:h?h.toFixed(1):'',points:'',pay:null,received:'',reason:RSN(x.k,x.rs),status:psName(x.ps),sdate:x.sdate||'',pdate:x.pdate||'',note:x.note||''})});
+  if(f.duty){const sc=spCalc(),M={};Object.entries(sc.d).forEach(([k,v])=>{if(!inR(k)||f.ps!=='all')return;[['hf',sc.m[k.slice(0,7)].hft==='hfp'?'Hostile fire pay':'Imminent danger pay'],['hdp','HDP-L']].forEach(([x,nm])=>{if(!v[x])return;const id=k.slice(0,7)+x;(M[id]=M[id]||{date:k,type:nm,n:0,pay:0}).n++;M[id].pay+=v[x]})});
+    Object.values(M).forEach(r=>out.push({date:r.date,type:r.type,period:r.n+' day(s)',start:'',end:'',hours:'',points:'',pay:Math.round(r.pay*100)/100,received:'',reason:'Special pay',status:'With duty pay',sdate:'',pdate:'',note:czOn(r.date.slice(0,7))?'CZTE month':''}))}
   if(f.trav)S.vouchers.forEach(v=>{const p=v.status==='draft'?'none':v.status;if(!inR(v.date)||!psOk(p))return;
     out.push({date:v.date,type:'Travel voucher',period:'',start:'',end:'',hours:'',points:'',pay:Number(v.amount)||0,received:v.status==='paid'?(v.paidAmt!==''&&v.paidAmt!=null?Number(v.paidAmt):Number(v.amount)||0):'',reason:'',status:v.status==='draft'?'Draft':psName(v.status),sdate:v.sdate||'',pdate:v.pdate||'',note:v.desc||''})});
   return out.sort((a,b)=>a.date.localeCompare(b.date)||a.type.localeCompare(b.type));
 }
-function payTot(R){const t={pay:0,paid:0,submitted:0,none:0,pts:0,hrs:0,trav:0};R.forEach(r=>{if(typeof r.pay==='number'){if(r.type==='Travel voucher')t.trav+=r.pay;else{t.pay+=r.pay;t[r.status==='Paid'?'paid':r.status==='Submitted'?'submitted':'none']+=r.pay}}if(typeof r.points==='number')t.pts+=r.points;t.hrs+=+r.hours||0});return t}
+function payTot(R){const t={pay:0,paid:0,submitted:0,none:0,pts:0,hrs:0,trav:0};R.forEach(r=>{if(typeof r.pay==='number'){if(r.type==='Travel voucher')t.trav+=r.pay;else if(r.reason==='Special pay')t.pay+=r.pay;else{t.pay+=r.pay;t[r.status==='Paid'?'paid':r.status==='Submitted'?'submitted':'none']+=r.pay}}if(typeof r.points==='number')t.pts+=r.points;t.hrs+=+r.hours||0});return t}
 const COLS_EX=[['date','Date'],['type','Type'],['period','Period'],['start','Start'],['end','End'],['hours','Hours'],['points','Points'],['pay','Amount ($)'],['received','Received ($)'],['reason','Reason for pay'],['status','Pay status'],['sdate','Submitted'],['pdate','Paid'],['note','Note']];
 function csvOf(R){const q=v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   const L=[COLS_EX.map(c=>c[1]).join(',')];R.forEach(r=>L.push(COLS_EX.map(([k])=>q(k==='pay'||k==='received'?(r[k]===null||r[k]===''?'':Number(r[k]).toFixed(2)):r[k])).join(',')));
@@ -1006,11 +1204,10 @@ function set(){
   <div><label for="sy">Retirement year anniversary</label><input type="date" id="sy" value="${S.yearStart}"></div>
   <div><label for="sm">Membership points</label><input type="number" id="sm" min="0" value="${S.member}"></div>
   <div><label for="stp">FTP + GTP per fiscal year</label><select id="stp">${[72,48].map(n=>`<option value="${n}" ${TPMAX()===n?'selected':''}>${n} (${n/3} per quarter, ${n/2} flying)</option>`).join('')}</select></div></div>
-  <p class="mute">Look up your daily rate on the current DFAS pay table for your grade and years of service. One UTA period is paid as one day of basic pay. Or use the pay lookup below and tap the button to set it. Points per status are editable further down.</p></div>
+  <p class="mute">Look up your daily rate on the current DFAS pay table for your grade and years of service. One UTA period is paid as one day of basic pay. Or use the pay lookup below and tap the button to set it. Orders (AT, MPA, RPA, ADOS) are priced from your pay grade with BAH, BAS and special pays; see Orders pay below.</p></div>
   ${retPanel()}
   ${pay()}
-  <div class="panel tbl"><h2>Pay statuses</h2><table><thead><tr><th>Status</th><th>Points per unit</th><th>Paid</th></tr></thead><tbody>
-  ${S.types.map((t,i)=>`<tr><td>${esc(t.name)}</td><td><input type="number" min="0" step="1" value="${t.pts}" data-pts="${i}" style="width:80px"></td><td><input type="checkbox" ${t.paid?"checked":""} data-paid="${i}" style="width:auto" aria-label="Paid"></td></tr>`).join("")}</tbody></table></div>
+  ${ordPayPanel()}
   ${icsPanel()}
   <div class="panel"><h2>Backup</h2><div class="row"><div style="flex:0 0 auto"><button class="btn ghost" id="exp">Copy data</button></div><div style="flex:2 1 200px"><label for="imp">Paste data to restore</label><input id="imp"></div><div style="flex:0 0 auto"><button class="btn ghost" id="impb">Restore</button></div></div>
   <p class="mute" id="bk">Data lives only in this browser, so copy a backup now and then.</p></div>`;
@@ -1071,7 +1268,7 @@ function edRender(focus){
   const m=$('#modal');if(!ED){m.innerHTML='';return}
   if(m.contains(document.activeElement)){const a=document.activeElement;a.blur();if(!ED)return}
   const D=ED.date,plan=utaPlan(D,ED.rows),ex=extraUta(D),used=edUsed();
-  const other=(calEvents()[D]||[]).filter(e=>!e.slot&&e.k!=='tp'&&e.k!=='duty'),ords=S.duty.map((d,ix)=>({d,ix})).filter(o=>ordOn(o.d,D));
+  const other=(calEvents()[D]||[]).filter(e=>!e.slot&&e.k!=='tp'&&e.k!=='duty'&&e.k!=='sp'),ords=S.duty.map((d,ix)=>({d,ix})).filter(o=>ordOn(o.d,D));
   const rowsHtml=ED.rows.map((r,i)=>{const auto=r.k==='uta'&&!r.sel&&!r.id&&plan[i],lk=r.ps==='paid',L=lk?' disabled':'';
     return `<div class='prow k-${r.k}'><div class='hd'><span><span class='chip k-${r.k}'>${KL[r.k]}</span>${lk?` <span class='tag ok'>Paid, locked</span>`:''}</span>${lk?'':`<button class='btn ghost sm' data-rm='${i}' aria-label='Remove ${KN[r.k]}'>Remove</button>`}</div>${lk?`<p class='lockn' style='grid-column:1/-1'>Change the pay status to edit or remove this entry.</p>`:''}
     ${r.k==='uta'?`<div class='w' style='grid-column:1/-1'><label for='eper${i}'>Period${auto?' <span>(next open)</span>':''}</label><select id='eper${i}' data-eper='${i}'${plan[i]?'':" style='border-color:var(--bad)'"}${L}>${utaOptions(D,plan,i)}</select></div>`:''}
@@ -1093,6 +1290,7 @@ function edRender(focus){
    <p class='mute' style='margin:0'>Orders can run several days and don’t count toward the 2 per day. Only AT counts toward annual tour; MPA, RPA and ADOS are man days.</p>
    ${ords.some(o=>o.d.type!=='pts')&&ED.rows.length?`<div class='tip warn' style='font-size:13px'>You’re on orders this day. Inactive duty (UTA periods, FTPs, GTPs) on a day you’re also on active duty orders can’t be paid.</div>`:''}
    ${ords.length?`<div style='margin-top:10px'><div class='mute'>Orders on this day</div>${ords.map(({d,ix})=>`<button class='tip tipbtn' style='font-size:13px;margin:4px 0' data-oe='${ix}'><span>${esc(T(d.type).name)}${ordSpan(d)>1?', '+fmt(d.date)+' to '+fmt(iso(addDays(pd(d.date),ordSpan(d)-1))):''}${d.note&&!d.slot?' ('+esc(d.note)+')':''} · ${psName(d.ps)}</span><span class='ed'>${d.ps==='paid'?'View':'Edit'}</span></button>`).join('')}</div>`:''}
+   ${spEdHtml(D)}
    ${other.length?`<div style='margin-top:10px'><div class='mute'>Also on this day</div>${other.map(e=>`<div class='tip' style='font-size:13px;margin:4px 0'>${esc(e.t)}</div>`).join('')}</div>`:''}
    <div class='err' id='ederr' role='alert'>${esc(ED.err)}</div>
    <div class='row' style='justify-content:flex-end'><div style='flex:0 0 auto'><button class='btn ghost' id='edc'>Cancel</button></div><div style='flex:0 0 auto'><button class='btn' id='eds'>Save</button></div></div>
@@ -1111,6 +1309,7 @@ function edRender(focus){
     s.oninput=()=>{if(!ED)return;const v=p24(s.value),r=ED.rows[i];if(v===null){r[bk]=true;t24Mark(s,!(s.value.replace(/\D/g,'').length>=4))}else{r[bk]=false;r[f]=v;t24Mark(s,true)}hl(i)};
     s.onblur=()=>{if(!ED)return;const v=p24(s.value),r=ED.rows[i];if(v===null){r[bk]=true;t24Mark(s,false)}else{r[bk]=false;r[f]=v;s.value=t24v(v);t24Mark(s,true)}hl(i)}}));
   m.querySelectorAll('[data-en]').forEach(s=>{s.oninput=()=>{ED.rows[+s.dataset.en].note=s.value};s.onchange=rsnRefresh;s.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();edSave()}}});
+  spBind(D);
   if(focus){const f=m.querySelector('[data-add]:not([disabled])')||$('#eds');if(f)f.focus({preventScroll:true})}
 }
 function edCancel(){const k=ED&&ED.dataKey;edClose();if(k){const b=document.querySelector(`[data-cd='${k}']`);if(b)b.focus({preventScroll:true})}}
@@ -1175,8 +1374,8 @@ function bind(){
   document.querySelectorAll("[data-cb]").forEach(e=>e.onchange=()=>{S.curr[+e.dataset.cb].basis=e.value;save();render()});
   document.querySelectorAll("[data-delc]").forEach(b=>b.onclick=()=>{S.curr.splice(+b.dataset.delc,1);save();render()});
   [["#sr",v=>S.rate=Number(v)||0],["#sy",v=>S.yearStart=v],["#sm",v=>S.member=Number(v)||0]].forEach(([s,f])=>{const e=$(s);if(e)e.onchange=()=>{f(e.value);save()}});
-  document.querySelectorAll("[data-pts]").forEach(e=>e.onchange=()=>{S.types[+e.dataset.pts].pts=Number(e.value)||0;save()});
-  document.querySelectorAll("[data-paid]").forEach(e=>e.onchange=()=>{S.types[+e.dataset.paid].paid=e.checked;save()});
+  
+  
   q("#addv",()=>{const desc=$("#vd").value.trim(),amount=Number($("#va").value),date=$("#vt").value,st=$("#vs").value;if(!desc||!date||!(amount>=0))return;S.vouchers.push({date,desc,amount,status:st,sdate:st!=="draft"?iso(today()):"",pdate:st==="paid"?iso(today()):"",paidAmt:""});save();render()});
   document.querySelectorAll("[data-vs]").forEach(e=>e.onchange=()=>{const v=S.vouchers[+e.dataset.vs];v.status=e.value;if(e.value==="draft")v.sdate="";else if(!v.sdate)v.sdate=iso(today());v.pdate=e.value==="paid"?iso(today()):"";save();render()});
   document.querySelectorAll("[data-vp]").forEach(e=>e.onchange=()=>{S.vouchers[+e.dataset.vp].paidAmt=e.value===""?"":Number(e.value);save();render()});
@@ -1195,6 +1394,10 @@ function bind(){
   const fpm=$('#fpm');if(fpm)fpm.onchange=()=>{S.fp.manual=fpm.value;save();render()};
   q('#usefp',()=>{const m=curPay().m,fm=fpMonthly();S.rate=Math.round((m+fm)/30*100)/100;save();render()});
   q('#usepay',()=>{const m=curPay().m;if(m){S.rate=Math.round(m/30*100)/100;save();render()}});
+  document.querySelectorAll('#view [data-op]').forEach(e=>e.onchange=()=>{const k=e.dataset.op;S.op=Object.assign({},S.op,{[k]:e.type==='checkbox'?(e.checked?1:0):e.value.trim()});save();render()});
+  {const h=$('#hfm');if(h)h.onchange=()=>{const m=CAL.y+'-'+String(CAL.m+1).padStart(2,'0');S.hfp=Object.assign({},S.hfp);if(h.checked)S.hfp[m]=1;else delete S.hfp[m];save();render()}}
+  document.querySelectorAll('[data-idp]').forEach(c=>c.onchange=()=>{const k=c.dataset.idp;S.sp=S.sp||{};const v=Object.assign({hdp:'0'},S.sp[k],{idp:c.checked?1:0});delete v.hf;if(v.idp||+v.hdp)S.sp[k]=v;else delete S.sp[k];save();render()});
+  {const c=$('#czm');if(c)c.onchange=()=>{const m=CAL.y+'-'+String(CAL.m+1).padStart(2,'0');S.czte=Object.assign({},S.czte);if(c.checked)S.czte[m]=1;else delete S.czte[m];save();render()}}
   pdBind();exBind();c5Bind();icsBind();f40Bind();
   {const e=$('#smws');if(e)e.onchange=()=>{S.mws=e.value;S.pos='';C5UI.msg='';save();render()};const p2=$('#spos');if(p2)p2.onchange=()=>{S.pos=p2.value;save();render()};q('#smwsclr',()=>{const k=mwsCur();S.curr=S.curr.filter(c=>!c.mws||c.mws===k);save();render()})}
   q('#bib',()=>{const rows=$('#bi').value.split('\n').map(l=>l.split('|').map(s=>s.trim())).filter(r=>r.length>=3&&r[1]);let n=0;const t=today();rows.forEach(r=>{const pv=parseIv(r[2]),iv=pv?pv.n:0,u=pv?pv.u:'d';if(iv<1)return;const cat=['Flying','Ground','CBT'].find(c=>c.toLowerCase()===(r[0]||'').toLowerCase())||'Ground';const ok=/^\d{4}-\d{2}-\d{2}$/.test(r[3]||''),bx=(r[4]||'').toLowerCase().replace(/[^a-z]/g,''),b=bx==='eom'||bx==='endofmonth'||bx==='month'?'eom':bx==='day'||bx==='onday'||bx==='ontheday'?'day':$('#bibasis').value;S.curr.push({cat,name:r[1],interval:iv,unit:u,basis:b,last:ok?r[3]:lapsedLast(iv,b,u)});n++});if(n){save();render()}else $('#bim').textContent='No valid lines found. Use: category | name | days | date.'});
@@ -1213,9 +1416,9 @@ function bind(){
   {const b=$('#icsclr');if(b)b.onclick=()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent=`Click again to remove ${b.dataset.n}`;return}clearIcsUta();render()}}
   q('#cat',()=>{const s=atSlots().find(s=>!slotGet(s.id,'at').date);if(s)setSlot(s.id,'at',{date:CAL.sel})});
   q("#exp",()=>{const j=JSON.stringify(S);try{navigator.clipboard.writeText(j).then(()=>$("#bk").textContent="Copied to clipboard.",()=>{$("#imp").value=j;$("#bk").textContent="Copy the text from the box."})}catch(e){$("#imp").value=j}});
-  q("#impb",()=>{try{S=Object.assign({},DEF,JSON.parse($("#imp").value));save();render()}catch(e){$("#bk").textContent="That text isn’t valid backup data."}});
+  q("#impb",()=>{try{S=Object.assign({},DEF,JSON.parse($("#imp").value));migrate();save();render()}catch(e){$("#bk").textContent="That text isn’t valid backup data."}});
 }
-function render(){tabs();$("#view").innerHTML={dash,duty,trav,curr,set}[tab]();bind()}
+function render(){spReset();tabs();$("#view").innerHTML={dash,duty,trav,curr,set}[tab]();bind()}
 migrate();render();
 </script>
 </body>
