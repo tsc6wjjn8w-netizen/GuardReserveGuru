@@ -1,4 +1,4 @@
-// GuardReserveGuru v4 API — Cloudflare Pages Function + D1
+// GuardReserveGuru v5 API — Cloudflare Pages Function + D1
 // Routes: POST register | POST login | POST logout | GET data | PUT data
 // Optional env: PIN_PEPPER (secret mixed into PIN hashes)
 
