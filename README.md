@@ -32,7 +32,7 @@ npx wrangler pages project create guardreserveguru --production-branch main
 npx wrangler pages deploy public --project-name guardreserveguru
 ```
 
-Your site will be at `https://guardreserveguru.pages.dev`.
+Your site will be at `https://guardreserveguru-6vs.pages.dev`.
 
 ## 5. Lock it down (recommended, do before sharing the link)
 
