@@ -627,10 +627,10 @@ function schedPanel(){
 function duty(){
   const opts=S.types.filter(t=>t.id!=='uta').map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("");
   const rows=[...S.duty].map((d,i)=>({...d,i})).sort((a,b)=>b.date.localeCompare(a.date));
-  return `${exportPanel()}
-  ${schedPanel()}
+  return `${schedPanel()}
   <div class="panel"><h2>Orders</h2><div class="row" style="align-items:center"><div style="flex:0 0 auto"><button class="btn" id="addord">+ Add orders</button></div>
-  <p class="mute" style="flex:3 1 260px;margin:0">For annual tour (AT), MPA, RPA, ADOS / ADT / school and points-only days. Only AT counts toward the 15-day annual tour; MPA, RPA and ADOS count as man days. You can also add orders from a day on the Overview calendar. To change or remove orders, tap them on their day on the Overview calendar.</p></div></div>`;
+  <p class="mute" style="flex:3 1 260px;margin:0">For annual tour (AT), MPA, RPA, ADOS / ADT / school and points-only days. Only AT counts toward the 15-day annual tour; MPA, RPA and ADOS count as man days. You can also add orders from a day on the Overview calendar. To change or remove orders, tap them on their day on the Overview calendar.</p></div></div>
+  ${exportPanel()}`;
 }
 const C5UI={msg:'',basis:'day'};
 function evDays(e){const d=e[4];if(typeof d==='number')return d;const p=posCur();return p in d?d[p]:null}
