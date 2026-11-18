@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GuardReserveGuru v6</title>
+<title>GuardReserveGuru v7</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#eef1f4;--card:#fff;--ink:#17222e;--mute:#5d6b7a;--line:#d5dce3;--acc:#245a8d;--acc-ink:#fff;--ok:#2b7a50;--warn:#a96a0c;--bad:#b0362b;--okbg:#e2f1e8;--warnbg:#fbefd6;--badbg:#f8e1de;--ftp:#2b7a50;--gtp:#7a4fb0;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -13,16 +13,19 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif}
 body.lock{overflow:hidden}
-main{max-width:920px;margin:0 auto;padding:20px 16px 60px}
+main{max-width:920px;margin:0 auto;padding:20px 16px calc(96px + env(safe-area-inset-bottom,0px))}
 h1{font:600 26px/1.2 "IBM Plex Serif",Georgia,serif;margin:0 0 4px}
 h2{font-size:17px;margin:0 0 10px}
 .sub{color:var(--mute);margin:0 0 16px;max-width:62ch}
-nav{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
-nav button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:500 15px inherit;color:var(--mute);cursor:pointer;white-space:nowrap}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;gap:2px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 12px rgba(0,0,0,.08);padding:0 6px env(safe-area-inset-bottom,0px);overflow-x:auto}
+nav button{background:none;border:0;border-top:3px solid transparent;padding:12px 14px 13px;font:500 15px inherit;color:var(--mute);cursor:pointer;white-space:nowrap}
+nav .ts{display:none}@media (max-width:600px){nav{padding-left:0;padding-right:0}nav button{padding:11px 4px 12px;font-size:13px;flex:1 1 0;min-width:0}nav .tl{display:none}nav .ts{display:inline}}
 nav button[aria-selected="true"]{color:var(--ink);border-color:var(--acc)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:16px}.tiles>.panel{padding:10px 11px;margin:0;min-width:0}.tiles .mute{font-size:12px;line-height:1.35}.tiles .big{font-size:22px;margin:3px 0}.tiles .big .mute{font-size:12px}.tiles .bar{height:6px;margin:5px 0}
+@media (max-width:760px){.tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:2px}.tiles>.panel{flex:0 0 152px;scroll-snap-align:start}}
 label{display:block;font-size:13px;color:var(--mute);margin-bottom:3px}
 input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
 .btn{background:var(--acc);color:var(--acc-ink);border:0;border-radius:6px;padding:9px 14px;font:500 14px inherit;cursor:pointer}
@@ -50,10 +53,10 @@ a{color:var(--acc)}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}.cal .cw{position:relative;min-width:0;display:flex}.cal .cw>button{flex:1 1 auto;width:100%}.cal .idpck{position:absolute;top:4px;right:4px;width:16px;height:16px;margin:0;padding:0;accent-color:var(--bad);cursor:pointer}.cal button{min-width:0;overflow:hidden}
 @media (max-width:600px){.cbn{font-size:9px;padding:1px 2px;border-left-width:2px}}.cal .h{font-size:12px;color:var(--mute);text-align:center;padding:4px 0}
 .cal button{min-height:92px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:3px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;font-size:12px;display:flex;flex-direction:column;justify-content:space-between;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .12s}
-.cal button.press{transform:scale(.95);outline:2px solid var(--acc)}
+.cal button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .cal button.out{opacity:.45}.cal button.today{border:2px solid var(--acc)}.cal button.sel{background:var(--card);outline:2px solid var(--acc)}
-.dots{display:flex;gap:3px;flex-wrap:wrap;align-items:center}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.d-duty{background:var(--acc)}.d-plan{border:2px solid var(--acc)}.d-cur{background:var(--warn)}.d-curbad{background:var(--bad)}.d-trav{background:var(--ok)}.d-sp{background:var(--bad)}.d-tp{background:var(--mute)}.d-ftp{background:var(--ftp)}.d-gtp{background:var(--gtp)}
+.dots{display:flex;gap:3px;flex-wrap:wrap;align-items:center}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}.dot.hol{background:none!important;box-shadow:inset 0 0 0 1.75px var(--c,var(--acc))}.dot.star{background:none!important;border-radius:0;color:var(--c,var(--acc));font-size:13px;line-height:8px;text-align:center;font-style:normal;overflow:visible;width:9px;flex:0 0 9px}
+.d-duty{background:var(--acc);--c:var(--acc)}.d-ord{background:var(--ink);--c:var(--ink)}.obn{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:600;line-height:1.35;padding:1px 5px;margin:2px -4px 0;background:color-mix(in srgb,var(--ink) 9%,transparent);border-top:1px solid color-mix(in srgb,var(--ink) 35%,transparent);border-bottom:1px solid color-mix(in srgb,var(--ink) 35%,transparent);color:var(--ink);white-space:nowrap;overflow:hidden}.obn.first{margin-left:0;border-left:3px solid var(--ink);border-radius:3px 0 0 3px}.obn.last{margin-right:0;border-right:1px solid color-mix(in srgb,var(--ink) 35%,transparent);border-radius:0 3px 3px 0}.obn .dot{flex:0 0 8px}.d-plan{border:2px solid var(--acc)}.d-cur{background:var(--warn)}.d-curbad{background:var(--bad)}.d-trav{background:var(--ok)}.d-sp{background:var(--bad)}.d-tp{background:var(--mute)}.d-ftp{background:var(--ftp);--c:var(--ftp)}.d-gtp{background:var(--gtp);--c:var(--gtp)}
 .ev{display:flex;align-items:center;gap:3px;font-size:10px;line-height:1.25;white-space:nowrap;overflow:hidden;max-width:100%}.ev .dot{flex:0 0 8px}.ev span{overflow:hidden;text-overflow:ellipsis}
 .ev .tm{color:var(--mute);flex:0 1 auto;margin-left:2px}
 .ctop{display:flex;flex-direction:column;width:100%;min-width:0}.cbns{display:flex;flex-direction:column;gap:2px;width:100%;margin:2px 0}.cbn{display:block;font-size:10px;font-weight:600;line-height:1.35;padding:1px 4px;border-radius:3px;border-left:3px solid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.cbn.ok{background:var(--okbg);color:var(--ok)}.cbn.warn{background:var(--warnbg);color:var(--warn)}.cbn.bad{background:var(--badbg);color:var(--bad)}.cbn.more{background:var(--line);color:var(--mute);border-left-color:var(--mute)}
@@ -77,13 +80,13 @@ a{color:var(--acc)}
 .chip.k-uta{background:var(--acc);color:var(--acc-ink)}.chip.k-ftp{background:var(--ftp);color:var(--card)}.chip.k-gtp{background:var(--gtp);color:var(--card)}
 .adds{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .adds .btn{flex:1 1 120px}
-.dayact{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.dayact #cedit,.dayact #cat{grid-column:1/-1}.dayact .btn{padding:9px 6px}
+.dayact{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:8px 0}.dayact #cedit,.dayact #cat{grid-column:1/-1}.dayact .btn{padding:9px 6px}.dayact .btn.ghost{padding:6px 3px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.dayact .ts{display:none}@media (max-width:480px){.dayact .btn.ghost{font-size:12px}.dayact .tl{display:none}.dayact .ts{display:inline}}
 .pdres{position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);max-height:320px;overflow:auto;margin-top:2px}
 .pdres [role=option]{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--line)}
 .pdres [role=option] small{grid-column:1/-1;color:var(--mute);font-size:12px}
 .pdres [role=option].hi,.pdres [role=option]:hover{background:var(--bg)}
 .pdres .none{padding:10px;color:var(--mute);font-size:13px}
-.src{font-size:11px;font-weight:600;padding:0 7px;border-radius:9px;align-self:center}.src.gsa{background:var(--okbg);color:var(--ok)}.src.dos{background:var(--warnbg);color:var(--warn)}.src.dod{background:var(--line);color:var(--acc)}.src.man{background:var(--line);color:var(--mute)}
+.src{font-size:11px;font-weight:600;padding:0 7px;border-radius:9px;align-self:center}.src.gsa{background:var(--okbg);color:var(--ok)}.src.dos{background:var(--warnbg);color:var(--warn)}.src.dod{background:var(--line);color:var(--acc)}.src.base{background:var(--acc);color:var(--acc-ink)}.src.man{background:var(--line);color:var(--mute)}
 .pdsel{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
 table.mini{min-width:0;width:auto}table.mini th,table.mini td{padding:3px 7px;font-size:12px}table.mini td.on{background:var(--okbg);font-weight:600}
 .t24{font-variant-numeric:tabular-nums;letter-spacing:.04em}.t24.bad{border-color:var(--bad);background:var(--badbg)}
@@ -119,14 +122,13 @@ table.mini{min-width:0;width:auto}table.mini th,table.mini td{padding:3px 7px;fo
 <main>
 <div id="acct" class="acct" hidden><span>Signed in as <b id="who"></b></span><span id="sync" class="sync" aria-live="polite"></span><button class="btn ghost sm" id="so" type="button">Sign out</button></div>
 <div id="cfl" class="cfl" hidden><span>This account was changed on another device. Which copy do you want to keep?</span><button class="btn sm" id="cfl-load" type="button">Use the latest</button><button class="btn ghost sm" id="cfl-keep" type="button">Keep this device&rsquo;s</button></div>
-<h1>GuardReserveGuru <span class="ver">v6</span></h1>
+<h1>GuardReserveGuru <span class="ver">v7</span></h1>
 <p class="sub">Log duty by pay status, watch your retirement points, and let GuardReserveGuru line up currency items with paid days. Your data saves to your account so it follows you to any device. Keep entries generic: no PII, unit details or CUI.</p>
-<nav role="tablist" id="tabs"></nav>
 <div id="view"></div>
 </main>
-<div id="modal"></div>
+<nav role="tablist" id="tabs" aria-label="Sections"></nav>
 <div id="auth" hidden><form class="panel authcard" id="af" autocomplete="on" novalidate>
-<h1 style="font-size:22px">GuardReserveGuru <span class="ver">v6</span></h1>
+<h1 style="font-size:22px">GuardReserveGuru <span class="ver">v7</span></h1>
 <p class="sub" id="am" style="margin-bottom:12px">Sign in to load your data.</p>
 <div class="seg"><button type="button" class="btn ghost" id="mi" aria-pressed="true">Sign in</button><button type="button" class="btn ghost" id="mn" aria-pressed="false">Create account</button></div>
 <label for="an">Name or callsign</label>
@@ -137,6 +139,7 @@ table.mini{min-width:0;width:auto}table.mini th,table.mini td{padding:3px 7px;fo
 <div class="err" id="ae" role="alert"></div>
 <button class="btn go" id="ago" type="submit">Sign in</button>
 </form></div>
+<div id="modal"></div>
 <script>
 const KEY="reserve-planner-v1";
 const DEF={rate:0,member:15,yearStart:"",types:[
@@ -315,9 +318,9 @@ function advice(){
 }
 
 function tabs(){
-  const L=[["dash","Overview"],["duty","Duty log"],["trav","Travel vouchers"],["curr","Currencies"],["set","Settings"]];
-  $("#tabs").innerHTML=L.map(([k,n])=>`<button role="tab" aria-selected="${k===tab}" data-t="${k}">${n}</button>`).join("");
-  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
+  const L=[["dash","Overview","Overview"],["duty","Duty log","Duty"],["trav","Travel vouchers","Travel"],["curr","Currencies","Currency"],["set","Settings","Settings"]];
+  $("#tabs").innerHTML=L.map(([k,n,sh])=>`<button role="tab" aria-selected="${k===tab}" data-t="${k}" aria-label="${n}"><span class="tl">${n}</span><span class="ts">${sh}</span></button>`).join("");
+  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();scrollTo(0,0)});
 }
 function tag(c){const{left}=currInfo(c);return left<0?`<span class="tag bad">Lapsed ${-left}d</span>`:left<=14?`<span class="tag warn">${left}d left</span>`:`<span class="tag ok">${left}d left</span>`}
 
@@ -374,19 +377,18 @@ function calEvents(){
   const E={},add=(k,e)=>{(E[k]=E[k]||[]).push(e)},t=today();
   S.duty.forEach((d,ix)=>{const ty=T(d.type),n=Math.max(1,ty.unit==='day'?d.units:Math.ceil(d.units/2)),s=pd(d.date),sm=(d.slot||'').match(/^uta-(\d+)-(\d+)-p(\d)$/),h=hrs(d.start,d.end),mon=sm?new Date(+sm[1],+sm[2]-1,1).toLocaleDateString(undefined,{month:'short'}):'',tid=ty.id||'',who=tid==='uta'?'UTAPS':'pay',stt=d.ps==='paid'?'paid':d.ps==='submitted'?who+' submitted':who+' not submitted',amt=dutyPay(d);
     for(let i=0;i<n;i++){const dt=addDays(s,i),fut=dt>t,nm=sm?'UTA period '+mon+' '+sm[3]+(RSN('uta',d.rs)&&d.rs!=='uta'?', '+RSN('uta',d.rs):'')+(d.memo?' ('+d.memo+')':''):ty.name+(d.note?' ('+d.note+')':'');
-      add(iso(dt),{k:'duty',ix,c:fut?'d-plan':'d-duty',t:nm+(d.start&&d.end?', '+d.start+' to '+d.end+(h?' ('+h.toFixed(1)+' h)':''):'')+(amt?', '+money(amt):'')+', '+(fut?'planned':stt),u:sm?{m:mon,p:sm[3]}:null,s:sm?'':(tid==='pts'?'Pts':tid.toUpperCase()),tm:tmTxt(d.start,d.end),slot:!!sm,uta:tid==='uta'})}});
+      add(iso(dt),{k:'duty',ix,ps:d.ps||'none',c:tid!=='uta'&&ORD.includes(tid)?'d-ord':'d-duty',ob:tid!=='uta'&&ORD.includes(tid)&&n>1?{pos:n===1?'one':i===0?'first':i===n-1?'last':'mid',lbl:tid==='pts'?'Pts':tid.toUpperCase(),st:d.start,en:d.end,ps:d.ps||'none',sun:dt.getDay()===0,sat:dt.getDay()===6}:null,t:nm+(d.start&&d.end?', '+d.start+' to '+d.end+(h?' ('+h.toFixed(1)+' h)':''):'')+(amt?', '+money(amt):'')+', '+(fut?'planned':stt),u:sm?{m:mon,p:sm[3]}:null,s:sm?'':(tid==='pts'?'Pts':tid.toUpperCase()),tm:tmTxt(d.start,d.end),slot:!!sm,uta:tid==='uta'})}});
   S.curr.forEach(c=>{const{due,left}=currInfo(c);add(iso(due),{k:'cur',c:left<0?'d-curbad':'d-cur',t:(c.cat?c.cat+': ':'')+c.name+(left<0?' lapsed':' expires'),bn:{n:c.name,v:left<0?'bad':left<=14?'warn':'ok'}})});
   {const sc=spCalc();Object.entries(S.sp||{}).forEach(([k,v])=>{const a=sc.d[k]||{hf:0,hdp:0},amt=a.hf+a.hdp,hd=+v.hdp>0;
     add(k,{k:'sp',c:'d-sp',s:hd?'HDP-L':'',nocell:!hd,t:'Special pay: '+[v.idp?'IDP':'',hd?'HDP-L $'+v.hdp+'/mo':''].filter(Boolean).join(', ')+(amt?', '+money(amt)+' this day':'')+(sc.st[k]?'. '+sc.st[k]:'')})});
    Object.entries(sc.m).forEach(([m,x])=>{if(x.hft==='hfp'&&x.hfd)add(x.hfd,{k:'sp',c:'d-sp',nocell:1,t:`Hostile fire pay for ${pd(m+'-01').toLocaleDateString(undefined,{month:'long'})}: ${money(HFR(x.hfd).hfp)}, full month`})})}
-  S.vouchers.forEach(v=>add(v.date,{k:'trav',c:'d-trav',t:'Travel voucher ('+v.status+'): '+v.desc+', '+money(Number(v.amount)||0)}));
   Object.entries(S.tpd||{}).forEach(([k,v])=>{TPK.forEach(([kd,,nm])=>{const L=tpList(v,kd);if(!L.length)return;const run=tpRun(k,kd),fut=pd(k)>t;
-    L.forEach((it,i)=>{const no=run-L.length+i+1,tm=tmTxt(it.start,it.end),h=hrs(it.start,it.end);add(k,{k:'tp',c:'d-'+kd,t:kd.toUpperCase()+' ('+nm.toLowerCase()+' TP), #'+no+' this quarter'+(RSN(kd,it.rs)?', '+RSN(kd,it.rs):'')+(it.note?' ('+it.note+')':'')+(tm?', '+tm+(h?' ('+h.toFixed(1)+' h)':''):'')+', '+(fut?'planned':psName(it.ps).toLowerCase()),s:kd.toUpperCase()+' '+no,tm})})})});
+    L.forEach((it,i)=>{const no=run-L.length+i+1,tm=tmTxt(it.start,it.end),h=hrs(it.start,it.end);add(k,{k:'tp',ps:it.ps||'none',c:'d-'+kd,t:kd.toUpperCase()+' ('+nm.toLowerCase()+' TP), #'+no+' this quarter'+(RSN(kd,it.rs)?', '+RSN(kd,it.rs):'')+(it.note?' ('+it.note+')':'')+(tm?', '+tm+(h?' ('+h.toFixed(1)+' h)':''):'')+', '+(fut?'planned':psName(it.ps).toLowerCase()),s:kd.toUpperCase()+' '+no,tm})})})});
   return E;
 }
 function dayCounts(D){const v=(S.tpd||{})[D]||{},u=S.duty.filter(x=>x.type==='uta'&&x.date===D).reduce((a,x)=>a+(x.slot?1:(+x.units||1)),0);return{uta:u,ftp:v.ftp||0,gtp:v.gtp||0,used:u+(v.ftp||0)+(v.gtp||0)}}
 function dayActions(D){
-  const c=dayCounts(D),qb=k=>{const ok=c.used<2&&c[k]<{uta:2,ftp:2,gtp:1}[k],why=c.used>=2?'Day is full (2 max)':`${{uta:'UTA period',ftp:'FTP',gtp:'GTP'}[k]} limit reached for this day`;return `<button class='btn ghost' data-qadd='${k}' ${ok?'':'disabled'} title='${ok?'':why}'>+ ${{uta:'UTA period',ftp:'FTP',gtp:'GTP'}[k]}</button>`};
+  const c=dayCounts(D),qb=k=>{const ok=c.used<2&&c[k]<{uta:2,ftp:2,gtp:1}[k],why=c.used>=2?'Day is full (2 max)':`${{uta:'UTA period',ftp:'FTP',gtp:'GTP'}[k]} limit reached for this day`;return `<button class='btn ghost' data-qadd='${k}' ${ok?'':'disabled'} title='${ok?'':why}' aria-label='Add ${{uta:'UTA period',ftp:'FTP',gtp:'GTP'}[k]}'>+ ${k==='uta'?"<span class='tl'>UTA period</span><span class='ts'>UTA</span>":k.toUpperCase()}</button>`};
   return `<div class='dayact'><button class='btn' id='cedit'>Edit pay statuses</button>${qb('uta')}${qb('ftp')}${qb('gtp')}<button class='btn ghost' id='cord'>+ Orders</button></div>
   <p class='mute' style='margin:0 0 6px'>${c.used} of 2 pay statuses used on this day.</p>`;
 }
@@ -400,13 +402,13 @@ function calendar(){
     cells+=`<div class='cw'><button data-cd='${k}' class='${d.getMonth()!==CAL.m?'out ':''}${k===ts?'today ':''}${k===CAL.sel?'sel':''}' aria-label='${esc(d.toDateString())}, ${ev.length} item(s)'>${cellHtml(ev.filter(e=>!e.nocell),d.getDate())}</button>${ck?`<input type='checkbox' class='idpck' data-idp='${k}' ${ip?'checked':''} title='Imminent danger pay (IDP) on this day' aria-label='IDP on ${esc(d.toDateString())}'>`:''}</div>`}
   const sel=E[CAL.sel]||[];
   return `<div class='panel'><div class='row' style='align-items:center'><div style='flex:0 0 auto'><button class='btn ghost sm' id='cprev' aria-label='Previous month'>Prev</button></div><h2 style='flex:1;margin:0;text-align:center'>${title}</h2><div style='flex:0 0 auto'><button class='btn ghost sm' id='ctoday'>Today</button> <button class='btn ghost sm' id='cnext' aria-label='Next month'>Next</button></div></div>
-  <p class='mute' style='text-align:center;margin:6px 0'>${cnt('duty')} duty day(s), ${cnt('cur')} currency date(s), ${cnt('trav')} voucher(s), ${cnt('tp')} FTP/GTP, ${cnt('sp')} special pay day(s) this month${czOn(pre)?" · <span class='tag bad'>CZTE month</span>":''}</p>
-  <div class='hint'><b>Right-click</b> a day (or <b>press and hold</b> on a phone or tablet) to add UTA periods, FTPs or GTPs.</div>
+  <p class='mute' style='text-align:center;margin:6px 0'>${cnt('duty')} duty day(s), ${cnt('cur')} currency date(s), ${cnt('tp')} FTP/GTP, ${cnt('sp')} special pay day(s) this month${czOn(pre)?" · <span class='tag bad'>CZTE month</span>":''}</p>
+  <div class='hint'><b>Double-click</b> a day (or <b>double-tap</b> on a phone or tablet) to add or edit pay: UTA periods, FTPs, GTPs and orders.</div>
   <div class='cal'>${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(x=>`<div class='h'>${x}</div>`).join('')}${cells}</div>
-  <div class='leg'><span><i class='dot d-duty'></i>Duty done</span><span><i class='dot d-plan'></i>Duty planned</span><span><i class='dot d-ftp'></i>FTP</span><span><i class='dot d-gtp'></i>GTP</span><span><i class='cbn ok' style='display:inline-block;font-style:normal'>Due</i> Currency, over 14 days left</span><span><i class='cbn warn' style='display:inline-block;font-style:normal'>Due</i> 14 days or fewer</span><span><i class='cbn bad' style='display:inline-block;font-style:normal'>Due</i> Lapsed</span><span><i class='dot d-trav'></i>Travel voucher</span><span><input type='checkbox' checked disabled style='width:12px;height:12px;margin:0;accent-color:var(--bad)'> IDP (top-right of a day)</span><span><i class='dot d-sp'></i>HDP-L</span></div>
+  <div class='leg'><span><i class='dot hol d-duty'></i>Not submitted</span><span><i class='dot d-duty'></i>Submitted</span><span><i class='dot star d-duty'>★</i>Paid</span><span><i class='dot d-duty'></i>UTA</span><span><i class='dot d-ord'></i>Orders (1 day)</span><span><i class='obn first last' style='display:inline-flex;margin:0;font-style:normal'>AT 0800</i> Orders, 2+ days</span><span><i class='dot d-ftp'></i>FTP</span><span><i class='dot d-gtp'></i>GTP</span><span><i class='cbn ok' style='display:inline-block;font-style:normal'>Due</i> Currency, over 14 days left</span><span><i class='cbn warn' style='display:inline-block;font-style:normal'>Due</i> 14 days or fewer</span><span><i class='cbn bad' style='display:inline-block;font-style:normal'>Due</i> Lapsed</span><span><input type='checkbox' checked disabled style='width:12px;height:12px;margin:0;accent-color:var(--bad)'> IDP (top-right of a day)</span><span><i class='dot d-sp'></i>HDP-L</span></div>
   <h2 style='margin-top:14px'>${fmt(CAL.sel)}</h2>
   ${dayActions(CAL.sel)}
-  ${sel.length?sel.map(e=>{const pd2=e.k==='duty'?S.duty[e.ix]:null,paid=pd2&&pd2.ps==='paid'||(e.k==='tp'&&/, paid$/.test(e.t));return e.k==='duty'&&pd2?`<button class='tip tipbtn' ${pd2.slot&&pd2.type==='uta'?`data-open='${CAL.sel}'`:`data-oe='${e.ix}'`}><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:e.k==='tp'||e.k==='sp'?`<button class='tip tipbtn' data-open='${CAL.sel}'><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:`<div class='tip'>${esc(e.t)}</div>`}).join(''):`<p class='mute'>Nothing on this day.</p>`}
+  ${sel.length?sel.map(e=>{const pd2=e.k==='duty'?S.duty[e.ix]:null,paid=pd2&&pd2.ps==='paid'||(e.k==='tp'&&/, paid$/.test(e.t));return e.k==='duty'&&pd2?`<button class='tip tipbtn' ${pd2.slot&&pd2.type==='uta'?`data-open='${CAL.sel}'`:`data-oe='${e.ix}'`}><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:e.k==='tp'||e.k==='sp'?`<button class='tip tipbtn' data-open='${CAL.sel}'><span>${esc(e.t)}</span><span class='ed'>${paid?'View':'Edit'}</span></button>`:`<div class='tip'>${esc(e.t)}</div>`}).join(''):''}
   <p class='mute'>Tap any pay status above to change or remove it. Paid entries are locked until you change their pay status. Orders (AT, MPA, RPA, ADOS) span one day per unit.</p>
   ${czPanel()}</div>`;
 }
@@ -423,19 +425,20 @@ function quarterPanel(){
   const tpRow=`<tr style='background:var(--bg)'><th scope='row' style='color:var(--ink)'>FTP + GTP combined</th>${tp.map(c=>`<td>${c.d+c.p>TPQ()?`<span class='tag bad'>${c.d+c.p} / ${TPQ()}</span>`:`<b>${c.d}</b>${c.p?` <span class='mute'>+${c.p}</span>`:''} <span class='mute x24'>/ ${TPQ()}</span>`}</td>`).join('')}${cell(tt)}<td class='mute'>of ${TPMAX()}</td></tr>`;
   return `<div class='panel'><h2>Pay statuses used by quarter: FY${w.fy}</h2>
   <div class='tbl'><table class='qt'><thead><tr><th>Pay status</th>${['Q1<br><span>Oct\u2013Dec</span>','Q2<br><span>Jan\u2013Mar</span>','Q3<br><span>Apr\u2013Jun</span>','Q4<br><span>Jul\u2013Sep</span>'].map((h,i)=>`<th${i===qn?" class='now'":''}>${h}</th>`).join('')}<th>FY total</th><th></th></tr></thead><tbody>${body}${tpRow}</tbody></table></div>
-  <p class='mute' style='margin:8px 0 0'><b style='color:var(--ink)'>Bold</b> is completed through today. <span>+n</span> is planned for a later date. The current quarter is highlighted. Add or change entries on the Duty log calendar.</p></div>`;
+  <p class='mute' style='margin:8px 0 0'><b style='color:var(--ink)'>Bold</b> is completed through today. <span>+n</span> is planned for a later date. The current quarter is highlighted. Add or change entries on the calendar above.</p></div>`;
 }
 function dash(){
   const st=stats(),pct=v=>Math.min(100,v/50*100),pt=payTotals(),vt=voucherTotals();
   const a=advice();
-  return `<div class="grid">
-  <div class="panel"><div class="mute">Retirement points this year</div><div class="big">${st.total}<span class="mute"> / 50</span></div>
+  return `<div class="tiles">
+  <div class="panel"><div class="mute">Retirement points</div><div class="big">${st.total}<span class="mute"> / 50</span></div>
   <div class="bar"><i style="width:${pct(st.total)}%"></i><i class="planned" style="width:${Math.min(pct(st.plan),100-pct(st.total))}%"></i></div>
   <div class="mute">${S.member} membership + ${st.done} earned + ${st.plan} planned<br>${st.w.set?fmt(st.w.s)+" to "+fmt(st.w.e):"Set your anniversary date in Settings"}</div></div>
   <div class="panel"><div class="mute">Duty pay earned</div><div class="big">${money(st.payD)}</div><div class="mute">Paid ${money(pt.paid)}<br>Submitted ${money(pt.submitted)}<br>Not submitted ${money(pt.none)}<br>${money(st.payP)} more planned${st.ordD||st.ordP?`<br>Includes ${money(st.ordD)} from orders`:''}${st.spD?`<br>Includes ${money(st.spD)} HFP / IDP / HDP-L`:''}${st.free?`<br>${money(st.free)} of it tax-free`:''}</div></div>
   <div class="panel"><div class="mute">Currencies</div><div class="big">${S.curr.filter(c=>currInfo(c).left>=0).length}<span class="mute"> / ${S.curr.length} current</span></div><div class="mute">${S.curr.filter(c=>{const l=currInfo(c).left;return l>=0&&l<=30}).length} expiring within 30 days</div></div>
-  ${(()=>{const r=retCalc();return `<div class="panel"><div class="mute">Estimated retirement pay</div>${r.set?`<div class="big">${money(r.moNow)}<span class="mute"> / mo</span></div><div class="mute">${r.now.toLocaleString()} points (${r.yrs.toFixed(2)} equivalent years)<br>${st.plan?`${money(r.moFut)} / mo with ${st.plan} planned points<br>`:''}${r.pl[0]==='brs'?'BRS 2.0%':'High-3 2.5%'}, ${esc(r.g)} pay, today\u2019s dollars</div>`:`<div class="big">\u2014</div><div class="mute">Enter your career points and retirement system in Settings.</div>`}</div>`})()}
+  ${(()=>{const r=retCalc();return `<div class="panel"><div class="mute">Estimated retirement pay</div>${r.set?`<div class="big">${money(r.moNow)}<span class="mute"> / mo</span></div>${st.plan?`<div class="mute">${money(r.moFut)} / mo with ${st.plan} planned points</div>`:''}`:`<div class="big">\u2014</div><div class="mute">Enter your career points and retirement system in Settings.</div>`}</div>`})()}
   <div class="panel"><div class="mute">Travel vouchers waiting</div><div class="big">${money(vt.submitted)}</div><div class="mute">${money(vt.draft)} in draft<br>${money(vt.paid)} paid</div></div></div>
+  ${calendar()}
   ${quarterPanel()}
   <div class="panel"><h2>Best-practice plan</h2>${a.length?a.map(x=>`<div class="tip ${x.lv}">${x.t}</div>`).join(""):`<p class="mute">Add duty days and currencies to get recommendations.</p>`}</div>`;
 }
@@ -512,10 +515,15 @@ function setSlot(id,kind,patch){
   applySlot(id,kind);save();render();
 }
 const hrs=(a,b)=>{if(!a||!b)return null;const m=x=>{const[h,n]=x.split(':').map(Number);return h*60+n};let d=m(b)-m(a);if(d<=0)d+=1440;return d/60};
-function cellHtml(ev,day){const us=[],ls=[],ds=[],bs=[];ev.forEach(e=>{if(e.nocell)return;if(e.bn)bs.push(e.bn);else if(e.u)us.push({c:e.c,t:e.u.m+' P'+e.u.p,tm:e.tm});else if(e.s)ls.push({c:e.c,t:e.s,tm:e.tm});else ds.push(e.c)});
+/* pay status marker: hollow = not submitted, solid = submitted, star = paid */
+const psMark=(c,ps)=>ps==='paid'?`<i class='dot star ${c}' title='Paid'>★</i>`:ps==='none'?`<i class='dot hol ${c}' title='Not submitted'></i>`:`<i class='dot ${c}'${ps?" title='Submitted'":''}></i>`;
+function cellHtml(ev,day){const us=[],ls=[],ds=[],bs=[],os=[];ev.forEach(e=>{if(e.nocell)return;if(e.ob){os.push(e.ob);return}if(e.bn)bs.push(e.bn);else if(e.u)us.push({c:e.c,t:e.u.m+' P'+e.u.p,tm:e.tm,ps:e.ps});else if(e.s)ls.push({c:e.c,t:e.s,tm:e.tm,ps:e.ps});else ds.push(e.c)});
   us.sort((x,y)=>x.t<y.t?-1:x.t>y.t?1:0);const all=[...us,...ls];
   const bo={bad:0,warn:1,ok:2};bs.sort((x,y)=>bo[x.v]-bo[y.v]);const bh=bs.length?`<span class='cbns'>${bs.slice(0,2).map(b=>`<span class='cbn ${b.v}' title='${esc(b.n)} due'>${esc(b.n)}</span>`).join('')}${bs.length>2?`<span class='cbn more'>+${bs.length-2} more due</span>`:''}</span>`:'';
-  return `<span class='ctop'><span>${day}</span>${bh}</span>`+all.slice(0,bs.length?3:4).map(l=>`<span class='ev'><i class='dot ${l.c}'></i><span>${esc(l.t)}</span>${l.tm?`<span class='tm'>${esc(l.tm)}</span>`:''}</span>`).join('')+(all.length>(bs.length?3:4)?`<span class='ev'>+${all.length-(bs.length?3:4)} more</span>`:'')+(ds.length?`<span class='dots'>${ds.slice(0,4).map(c=>`<i class='dot ${c}'></i>`).join('')}</span>`:'')}
+  /* multi-day orders: a see-through banner across the days; report time on the first day, release time on the last */
+  const oh=os.map(o=>{const t=o.pos==='first'?(o.st?' '+t24v(o.st):''):o.pos==='last'?(o.en?' rel '+t24v(o.en):''):'',show=o.pos!=='mid'||o.sun;
+    return `<span class='obn ${o.pos}${o.sun?' wks':''}${o.sat?' wke':''}' title='${esc(o.lbl)} orders${o.pos==='first'&&o.st?', report '+t24v(o.st):''}${o.pos==='last'&&o.en?', release '+t24v(o.en):''}'>${o.pos==='first'?psMark('d-ord',o.ps):''}${show?`<span>${esc(o.lbl)}${esc(t)}</span>`:'&nbsp;'}</span>`}).join('');
+  return `<span class='ctop'><span>${day}</span>${bh}${oh}</span>`+all.slice(0,bs.length?3:4).map(l=>`<span class='ev'>${psMark(l.c,l.ps)}<span>${esc(l.t)}</span>${l.tm?`<span class='tm'>${esc(l.tm)}</span>`:''}</span>`).join('')+(all.length>(bs.length?3:4)?`<span class='ev'>+${all.length-(bs.length?3:4)} more</span>`:'')+(ds.length?`<span class='dots'>${ds.slice(0,4).map(c=>`<i class='dot ${c}'></i>`).join('')}</span>`:'')}
 function upsTotals(){const w=fyWindow(),t=today(),r={none:0,submitted:0,paid:0,planned:0,hrs:0};S.duty.forEach(d=>{if(d.type!=='uta')return;const dt=pd(d.date);if(dt<w.s||dt>w.e)return;r.hrs+=hrs(d.start,d.end)||0;const a=dutyPay(d);if(dt>t)r.planned+=a;else r[d.ps||'none']+=a});return r}
 const QL=['Q1 (Oct to Dec)','Q2 (Jan to Mar)','Q3 (Apr to Jun)','Q4 (Jul to Sep)'];
 const qNow=()=>{const m=today().getMonth();return m>=9?0:Math.floor((m+3)/3)};
@@ -536,7 +544,7 @@ function tpLog(){
   const rows=Object.entries(S.tpd||{}).sort((a,b)=>b[0].localeCompare(a[0])).map(([k,v])=>{
     const items=TPK.flatMap(([kd])=>tpList(v,kd).map(it=>`<div><span class='chip k-${kd}' style='font-size:11px'>${kd.toUpperCase()}</span> ${tmTxt(it.start,it.end)?esc(tmTxt(it.start,it.end))+' · ':''}${RSN(kd,it.rs)?esc(RSN(kd,it.rs))+' · ':''}${esc(psName(it.ps))}${it.note?` <span class='mute'>${esc(it.note)}</span>`:''}</div>`)).join('');
     return `<tr><td>${fmt(k)}${pd(k)>today()?' <span class="tag plan">Planned</span>':''}</td><td>${items}</td><td style='white-space:nowrap'><button class='btn ghost sm' data-open='${k}' aria-label='Edit ${k}'>Edit</button> <button class='btn ghost sm' data-tpdel='${k}' aria-label='Delete TPs on ${k}'>Delete</button></td></tr>`}).join('');
-  return `<div class='panel'><h2>FTP and GTP entries</h2><p class='mute' style='margin:0 0 8px'>Added from the calendar: right-click a day (or press and hold) and add an FTP or GTP. Each entry has its own pay status and note. They count toward the ${TPMAX()}-TP total and the quarterly limit.</p><div class='tbl'><table><thead><tr><th>Date</th><th>Entries</th><th></th></tr></thead><tbody>${rows||`<tr><td colspan='3' class='mute'>None yet. Right-click a day on the calendar above to add one.</td></tr>`}</tbody></table></div></div>`;
+  return `<div class='panel'><h2>FTP and GTP entries</h2><p class='mute' style='margin:0 0 8px'>Added from the Overview calendar: double-click a day (or double-tap) and add an FTP or GTP. Each entry has its own pay status and note. They count toward the ${TPMAX()}-TP total and the quarterly limit.</p><div class='tbl'><table><thead><tr><th>Date</th><th>Entries</th><th></th></tr></thead><tbody>${rows||`<tr><td colspan='3' class='mute'>None yet. Double-click a day on the Overview calendar to add one.</td></tr>`}</tbody></table></div></div>`;
 }
 function migrate(){
   let ch=false;
@@ -578,7 +586,7 @@ function tpAdvice(){
   else out.push({lv:need?'warn':'ok',t:`<b>TPs:</b> ${r.ftp+r.gtp} of ${TPMAX()} done (${r.ftp} FTP, ${r.gtp} GTP). `+(need?`${need} more flying TPs needed, and ${left-need} of the ${left} remaining can be ground.`:`The 50% flying requirement is met, and ${left} remaining can be either type.`)});
   out.push({lv:'ok',t:`<b>UTA periods:</b> ${r.uta} of 48 dated (${r.utaD} done).`});
   const perDay={};S.duty.forEach(d=>{if(d.type==='uta'&&d.slot)perDay[d.date]=(perDay[d.date]||0)+d.units});
-  Object.entries(perDay).filter(([k,n])=>n>2).forEach(([k,n])=>out.push({lv:'warn',t:`<b>UTAPS advisory:</b> ${n} UTA periods are dated ${fmt(k)}, over the 2-per-day limit. Right-click that day to fix it.`}));
+  Object.entries(perDay).filter(([k,n])=>n>2).forEach(([k,n])=>out.push({lv:'warn',t:`<b>UTAPS advisory:</b> ${n} UTA periods are dated ${fmt(k)}, over the 2-per-day limit. Double-click that day to fix it.`}));
   const odd=r.blocks.filter(n=>n!==5);
   if(r.at>15)out.push({lv:'warn',t:`<b>AT advisory:</b> ${r.at} AT days are logged, which is over the 15-day plan.`});
   else if(odd.length)out.push({lv:'warn',t:`<b>AT advisory:</b> AT is planned in 5-day blocks, and you have block(s) of ${odd.join(', ')} day(s). This is a suggestion, not a rule.`});
@@ -609,9 +617,9 @@ function schedPanel(){
   ${tpAdvice().map(x=>`<div class='tip ${x.lv}'>${x.t}</div>`).join('')}
   <h2 style='margin:14px 0 6px;font-size:15px'>TPs used by quarter</h2>
   <div class='tbl'><table><thead><tr><th>Quarter</th><th>FTP</th><th>GTP</th><th>Combined</th><th></th></tr></thead><tbody>${qrows}</tbody></table></div>
-  <p class='mute'>Counted from the days you add on the calendar. More than ${TPQ()} FTP + GTP in one quarter is flagged.</p>${lg.ftp+lg.gtp?`<p class='mute'>Includes ${lg.ftp} FTP and ${lg.gtp} GTP entered earlier without dates. <button class='btn ghost sm' id='tpclr'>Clear undated counts</button></p>`:''}</div>
+  <p class='mute'>Counted from the days you add on the Overview calendar. More than ${TPQ()} FTP + GTP in one quarter is flagged.</p>${lg.ftp+lg.gtp?`<p class='mute'>Includes ${lg.ftp} FTP and ${lg.gtp} GTP entered earlier without dates. <button class='btn ghost sm' id='tpclr'>Clear undated counts</button></p>`:''}</div>
   <div class='panel'><h2>Monthly UTA periods</h2>
-  <p class='mute' style='margin:0'>Add UTA periods from the calendar: right-click a day (or press and hold) and choose UTA period. Each one defaults to the first open period after your latest submitted or paid period, and you can pick a different one from the Period list. Tap a dated period here to change its pay status or note. Times can be set in the day editor or in the duty log below. Pay figures are completed periods only, at your daily rate from Settings.</p>${(()=>{const n=icsUtaIds().length+icsUtaLoose().length;return n?`<div class='tip warn' style='display:flex;gap:10px;align-items:center;flex-wrap:wrap'><span style='flex:1 1 240px'>${n} planned UTA period${n===1?' is':'s are'} from an imported or 349 AMW schedule and not yet submitted.</span><button class='btn ghost sm' id='icsclr' data-n='${n}'>Remove them</button></div>`:''})()}${upsTiles}${months}</div>
+  <p class='mute' style='margin:0'>Add UTA periods from the Overview calendar: double-click a day (or double-tap) and choose UTA period. Each one defaults to the first open period after your latest submitted or paid period, and you can pick a different one from the Period list. Tap a dated period here to change its pay status or note. Times can be set in the day editor or in the duty log below. Pay figures are completed periods only, at your daily rate from Settings.</p>${(()=>{const n=icsUtaIds().length+icsUtaLoose().length;return n?`<div class='tip warn' style='display:flex;gap:10px;align-items:center;flex-wrap:wrap'><span style='flex:1 1 240px'>${n} planned UTA period${n===1?' is':'s are'} from an imported or 349 AMW schedule and not yet submitted.</span><button class='btn ghost sm' id='icsclr' data-n='${n}'>Remove them</button></div>`:''})()}${upsTiles}${months}</div>
   <div class='panel'><h2>Annual tour (15 days)</h2><p class='mute' style='margin:0 0 8px'>Only AT orders count here. MPA, RPA and ADOS orders are man days and are tracked separately.</p>
   <div class='tbl'><table><thead><tr><th>Block</th><th>Start date</th><th>Length</th><th>Status</th></tr></thead><tbody>${ats}</tbody></table></div></div>
   ${tpLog()}`;
@@ -619,13 +627,10 @@ function schedPanel(){
 function duty(){
   const opts=S.types.filter(t=>t.id!=='uta').map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("");
   const rows=[...S.duty].map((d,i)=>({...d,i})).sort((a,b)=>b.date.localeCompare(a.date));
-  return `${calendar()}${exportPanel()}
-  ${f40Panel()}${schedPanel()}
+  return `${exportPanel()}
+  ${schedPanel()}
   <div class="panel"><h2>Orders</h2><div class="row" style="align-items:center"><div style="flex:0 0 auto"><button class="btn" id="addord">+ Add orders</button></div>
-  <p class="mute" style="flex:3 1 260px;margin:0">For annual tour (AT), MPA, RPA, ADOS / ADT / school and points-only days. Only AT counts toward the 15-day annual tour; MPA, RPA and ADOS count as man days. You can also add orders from a day on the calendar. Tap Edit on any entry below to change or remove it.</p></div></div>
-  <div class="panel tbl"><table><thead><tr><th>Date</th><th>Status</th><th>Units</th><th>Points</th><th>Pay amount</th><th>Pay status</th><th></th></tr></thead><tbody>
-  ${rows.map(d=>{const ty=T(d.type),fut=pd(d.date)>today();return `<tr><td>${fmt(d.date)} ${fut?'<span class="tag plan">Planned</span>':""}</td><td>${esc(ty.name)}<div class="mute">${esc(d.note)}${d.memo?' · '+esc(d.memo):''}</div><div class="row" style="gap:4px;margin-top:4px;flex-wrap:nowrap"><div style="flex:0 0 auto"><input type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="HHMM" class="t24" data-tm="${d.i}|start" value="${t24v(d.start)}" style="width:76px" aria-label="Start time"></div><div style="flex:0 0 auto"><input type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="HHMM" class="t24" data-tm="${d.i}|end" value="${t24v(d.end)}" style="width:76px" aria-label="End time"></div></div>${hrs(d.start,d.end)?`<div class="mute">${hrs(d.start,d.end).toFixed(1)} h</div>`:""}</td><td>${d.units}</td><td>${ty.pts*d.units}</td><td><input type="number" min="0" step="0.01" data-man="${d.i}" value="${hasManual(d)?d.manual:""}" placeholder="${calcPay(d).toFixed(2)}" style="width:100px" aria-label="Pay amount, blank uses calculated">${ordPaid(d.type)?(()=>{const c=ordCalc(d),t=c.tot;return `<div class="mute" style="font-size:12px;white-space:nowrap">Basic ${money(t.basic)}${t.fp?' · flight '+money(t.fp):''}${t.bah?'<br>'+(c.bahT==='rc'?'BAH RC/T ':'BAH ')+money(t.bah):''}${t.bas?' · BAS '+money(t.bas):''}${t.free?'<br>'+money(t.free)+' tax-free':''}</div>`})():''}</td><td><select data-ps="${d.i}" style="width:auto" aria-label="Pay status">${PS.map(([k,n])=>`<option value="${k}" ${(d.ps||"none")===k?"selected":""}>${n}</option>`).join("")}</select>${d.ps==="submitted"&&d.sdate?`<div class="mute">${ageTxt(d.sdate)}</div>`:""}</td><td style="white-space:nowrap"><button class="btn ghost sm" ${d.type==='uta'&&d.slot?`data-open="${d.date}"`:`data-oe="${d.i}"`} aria-label="${d.ps==='paid'?'View':'Edit'} entry">${d.ps==='paid'?'View':'Edit'}</button> <button class="btn ghost sm" data-del="${d.i}" aria-label="Delete entry" ${d.ps==='paid'?'disabled title="Paid entries are locked. Change the pay status to delete."':''}>Delete</button></td></tr>`}).join("")||`<tr><td colspan="7" class="mute">No duty logged yet. Right-click a day on the calendar to add UTA periods, or add orders above.</td></tr>`}
-  </tbody></table></div>`;
+  <p class="mute" style="flex:3 1 260px;margin:0">For annual tour (AT), MPA, RPA, ADOS / ADT / school and points-only days. Only AT counts toward the 15-day annual tour; MPA, RPA and ADOS count as man days. You can also add orders from a day on the Overview calendar. To change or remove orders, tap them on their day on the Overview calendar.</p></div></div>`;
 }
 const C5UI={msg:'',basis:'day'};
 function evDays(e){const d=e[4];if(typeof d==='number')return d;const p=posCur();return p in d?d[p]:null}
@@ -859,7 +864,7 @@ function ordBreak(c,man){
   ${row('Basic pay',m(t.basic),`${t.w} paid day${t.w===1?'':'s'} × ${m(c.basicM/30)}`)}
   ${t.fp?row('Flight pay',m(t.fp),`${m(c.fpM)}/mo ÷ 30`):''}
   ${c.bahM?row(BAHLBL[c.bahT],m(t.bah),`${m(c.bahM)}/mo, ${c.dep?'with':'without'} dependents`):''}
-  ${c.basM?row('BAS',m(t.bas),`${m(c.basM)}/mo, ${isOff(c.g)?'officer':'enlisted'}`):''}
+  ${c.basM?row('BAS',m(t.bas),`${m(c.basM)}/mo, ${/^[OW]-/.test(c.g)?'officer':'enlisted'}`):''}
   <tr style='font-weight:600'><td>Gross</td><td style='text-align:right'>${m(t.gross)}</td><td></td></tr>
   ${row('Tax-free',m(t.free),`BAH and BAS${t.ex?' + '+m(t.ex)+' CZTE':''}`)}
   ${t.tax?row('Estimated tax',m(-t.tax),`${OP().tax}% of ${m(t.taxable)} taxable`)+`<tr style='font-weight:600'><td>Estimated take-home</td><td style='text-align:right'>${m(t.net)}</td><td class='mute'>before FICA</td></tr>`:''}
@@ -909,7 +914,7 @@ function ordPayPanel(){
   <h2 style='margin:14px 0 6px;font-size:15px'>Include on orders</h2>
   <div>${ck('bah','BAH')}${ck('bas','BAS')}${ck('fp',`Flight pay${fpMonthly()?' ('+money(fpMonthly())+'/mo)':' (none set)'}`)}</div>
   <h2 style='margin:14px 0 6px;font-size:15px'>Special pay and taxes</h2>
-  <p class='mute' style='margin:0 0 6px'>On the Duty log calendar: tick <b>IDP</b> in the top-right corner of each day you were in an imminent danger area, and tick <b>Combat zone (CZTE)</b> and <b>Hostile fire pay (HFP)</b> under the calendar for the whole month. HDP-L is set per day in the day editor (right-click or press and hold a day).</p>
+  <p class='mute' style='margin:0 0 6px'>On the Overview calendar: tick <b>IDP</b> in the top-right corner of each day you were in an imminent danger area, and tick <b>Combat zone (CZTE)</b> and <b>Hostile fire pay (HFP)</b> under the calendar for the whole month. HDP-L is set per day in the day editor (double-click or double-tap a day).</p>
   <div class='row'><div style='flex:0 1 260px'><label for='optax'>Estimated income tax rate (%)</label><input type='number' id='optax' data-op='tax' min='0' max='60' step='0.1' value='${esc(o.tax)}' placeholder='Blank = don’t estimate'></div></div>
   <div class='tbl' style='margin-top:8px'><table class='mini'><tr><th></th><th>Through Sep 30, 2026</th><th>From Oct 1, 2026</th></tr>
   <tr><th>Imminent danger pay (per day, monthly cap)</th><td${R.idp===225?" class='on'":''}>$7.50/day, $225/mo</td><td${R.idp===275?" class='on'":''}>$9.16/day, $275/mo</td></tr>
@@ -943,40 +948,78 @@ const LOCS=(()=>{const L=[],std=GSA_D.find(r=>r[0]==='Standard Rate');
   L.push({k:'man',name:'Other location (enter rates yourself)',sub:'Anywhere not listed'});
   L.forEach((x,i)=>{x.i=i;x.hay=(x.name+' '+(x.sub||'')+' '+(x.k==='dos'?'foreign oconus state dept':x.k==='gsa'?'conus gsa':x.k==='dod'?'dod oconus '+(x.nf?'non-foreign':'foreign base'):'')+' '+(x.post||'')).toLowerCase()});
   return L})();
+/* Stateside military installations: [name, state, county, other names, GSA rate area ('' = standard CONUS rate)].
+   GSA lists cities and counties, not bases, so each installation points at the GSA area for its county.
+   Bases in Alaska, Hawaii, US territories and overseas are already in the DoD table by name. */
+const INST_D=[["Altus AFB","OK","Jackson","",""],["Joint Base Andrews","MD","Prince George's","Andrews AFB","District of Columbia, MD"],["Arnold AFB","TN","Coffee","",""],["Barksdale AFB","LA","Bossier","",""],["Beale AFB","CA","Yuba","",""],["Buckley SFB","CO","Arapahoe","Buckley AFB","Denver / Aurora, CO"],["Cannon AFB","NM","Curry","",""],["Cape Canaveral SFS","FL","Brevard","Cape Canaveral AFS","Cocoa Beach, FL"],["Patrick SFB","FL","Brevard","Patrick AFB","Cocoa Beach, FL"],["Joint Base Charleston","SC","Charleston","Charleston AFB","Charleston, SC"],["Columbus AFB","MS","Lowndes","",""],["Davis-Monthan AFB","AZ","Pima","DM AFB","Tucson, AZ"],["Dover AFB","DE","Kent","",""],["Dyess AFB","TX","Taylor","",""],["Edwards AFB","CA","Edwards AFB","","Los Angeles, CA"],["Eglin AFB","FL","Okaloosa","","Fort Walton Beach / De Funiak Springs, FL"],["Hurlburt Field","FL","Okaloosa","","Fort Walton Beach / De Funiak Springs, FL"],["Duke Field","FL","Okaloosa","","Fort Walton Beach / De Funiak Springs, FL"],["Ellsworth AFB","SD","Meade","",""],["Fairchild AFB","WA","Spokane","","Spokane, WA"],["F.E. Warren AFB","WY","Laramie","FE Warren Francis E Warren",""],["Goodfellow AFB","TX","Tom Green","",""],["Grand Forks AFB","ND","Grand Forks","",""],["Hanscom AFB","MA","Middlesex","","Burlington / Woburn, MA"],["Hill AFB","UT","Davis","",""],["Holloman AFB","NM","Otero","",""],["Keesler AFB","MS","Harrison","",""],["Kirtland AFB","NM","Bernalillo","","Albuquerque, NM"],["Joint Base Langley-Eustis (Langley)","VA","Hampton","Langley AFB",""],["Joint Base Langley-Eustis (Fort Eustis)","VA","Newport News","Fort Eustis",""],["Laughlin AFB","TX","Val Verde","",""],["Little Rock AFB","AR","Pulaski","",""],["Los Angeles AFB","CA","Los Angeles","LA AFB El Segundo","Los Angeles, CA"],["Luke AFB","AZ","Maricopa","","Phoenix / Scottsdale, AZ"],["MacDill AFB","FL","Hillsborough","","Tampa / St. Petersburg, FL"],["Malmstrom AFB","MT","Cascade","",""],["Maxwell AFB","AL","Montgomery","Gunter Annex",""],["Joint Base Lewis-McChord","WA","Pierce","McChord AFB Fort Lewis JBLM","Tacoma, WA"],["McConnell AFB","KS","Sedgwick","",""],["Joint Base McGuire-Dix-Lakehurst","NJ","Burlington","McGuire AFB Fort Dix JBMDL","Cherry Hill / Moorestown, NJ"],["Lakehurst (JB MDL)","NJ","Ocean","NAES Lakehurst","Toms River, NJ"],["Minot AFB","ND","Ward","",""],["Moody AFB","GA","Lowndes","",""],["Mountain Home AFB","ID","Elmore","","Sun Valley / Ketchum, ID"],["Nellis AFB","NV","Clark","","Las Vegas, NV"],["Creech AFB","NV","Clark","Indian Springs","Las Vegas, NV"],["Offutt AFB","NE","Sarpy","",""],["Peterson SFB","CO","El Paso","Peterson AFB","Colorado Springs, CO"],["Schriever SFB","CO","El Paso","Schriever AFB","Colorado Springs, CO"],["Cheyenne Mountain SFS","CO","El Paso","","Colorado Springs, CO"],["US Air Force Academy","CO","El Paso","USAFA","Colorado Springs, CO"],["Pope Field","NC","Cumberland","Pope AFB","Fayetteville, NC"],["Robins AFB","GA","Houston","Warner Robins",""],["Joint Base San Antonio-Lackland","TX","Bexar","Lackland AFB JBSA Kelly Field","San Antonio, TX"],["Joint Base San Antonio-Randolph","TX","Bexar","Randolph AFB JBSA","San Antonio, TX"],["Joint Base San Antonio-Fort Sam Houston","TX","Bexar","Fort Sam Houston JBSA","San Antonio, TX"],["Scott AFB","IL","St. Clair","","East St. Louis / O'Fallon / Fairview Heights, IL"],["Seymour Johnson AFB","NC","Wayne","",""],["Shaw AFB","SC","Sumter","",""],["Sheppard AFB","TX","Wichita","",""],["Tinker AFB","OK","Oklahoma","","Oklahoma City, OK"],["Travis AFB","CA","Solano","Fairfield",""],["Tyndall AFB","FL","Bay","","Panama City, FL"],["Vance AFB","OK","Garfield","",""],["Vandenberg SFB","CA","Santa Barbara","Vandenberg AFB","Santa Barbara, CA"],["Whiteman AFB","MO","Johnson","",""],["Wright-Patterson AFB","OH","Greene","WPAFB","Dayton / Fairborn, OH"],["Joint Base Anacostia-Bolling","DC","District of Columbia","Bolling AFB JBAB","District of Columbia, DC"],["Pentagon","VA","Arlington","","District of Columbia, VA"],["Grissom ARB","IN","Miami","",""],["Homestead ARB","FL","Miami-Dade","","Miami, FL"],["March ARB","CA","Riverside","","Palm Springs, CA"],["Westover ARB","MA","Hampden","","Springfield, MA"],["Dobbins ARB","GA","Cobb","","Marietta, GA"],["Niagara Falls ARS","NY","Niagara","","Niagara Falls, NY"],["Pittsburgh ARS","PA","Allegheny","","Pittsburgh, PA"],["Minneapolis-St. Paul ARS","MN","Hennepin","","Minneapolis / St. Paul, MN"],["Youngstown ARS","OH","Trumbull","",""],["Selfridge ANGB","MI","Macomb","",""],["Pease ANGB","NH","Rockingham","","Portsmouth, NH"],["Stewart ANGB","NY","Orange","Newburgh","West Point, NY"],["Gabreski ANGB","NY","Suffolk","Westhampton","Riverhead / Ronkonkoma / Melville, NY"],["Hancock Field ANGB","NY","Onondaga","Syracuse","Syracuse / Oswego, NY"],["Stratton ANGB","NY","Schenectady","","Saratoga Springs / Schenectady, NY"],["Joint Base Cape Cod","MA","Barnstable","Otis ANGB Camp Edwards","Hyannis, MA"],["Barnes ANGB","MA","Hampden","Westfield","Springfield, MA"],["Bradley ANGB","CT","Hartford","","Hartford, CT"],["Quonset ANGB","RI","Washington","",""],["Burlington ANGB","VT","Chittenden","","Burlington, VT"],["Bangor ANGB","ME","Penobscot","",""],["Atlantic City ANGB","NJ","Atlantic","",""],["Horsham AGS","PA","Montgomery","Biddle","Montgomery, PA"],["Harrisburg ANGB","PA","Dauphin","",""],["Martin State ANGB","MD","Baltimore","Warfield","Baltimore City, MD"],["New Castle ANGB","DE","New Castle","","Wilmington, DE"],["McEntire JNGB","SC","Richland","","Columbia, SC"],["Charlotte ANGB","NC","Mecklenburg","","Charlotte, NC"],["Savannah ANGB","GA","Chatham","Savannah CRTC","Savannah, GA"],["Jacksonville ANGB","FL","Duval","",""],["Montgomery ANGB","AL","Montgomery","Dannelly Field",""],["Birmingham ANGB","AL","Jefferson","Sumpter Smith","Birmingham, AL"],["Thompson Field ANGB","MS","Rankin","Jackson ANGB",""],["Key Field ANGB","MS","Lauderdale","Meridian",""],["Gulfport CRTC","MS","Harrison","",""],["McGhee Tyson ANGB","TN","Blount","",""],["Memphis ANGB","TN","Shelby","","Memphis, TN"],["Berry Field ANGB","TN","Davidson","Nashville","Nashville, TN"],["Louisville ANGB","KY","Jefferson","","Louisville, KY"],["Rickenbacker ANGB","OH","Franklin","","Columbus, OH"],["Springfield-Beckley ANGB","OH","Clark","",""],["Toledo ANGB","OH","Lucas","",""],["Mansfield Lahm ANGB","OH","Richland","",""],["Fort Wayne ANGB","IN","Allen","",""],["Peoria ANGB","IL","Peoria","",""],["Volk Field","WI","Juneau","Volk Field CRTC",""],["Truax Field ANGB","WI","Dane","Madison","Madison, WI"],["Milwaukee ANGB","WI","Milwaukee","Mitchell Field","Milwaukee, WI"],["Duluth ANGB","MN","St. Louis","","Duluth, MN"],["Des Moines ANGB","IA","Polk","","Des Moines, IA"],["Sioux City ANGB","IA","Woodbury","",""],["Lincoln ANGB","NE","Lancaster","",""],["Forbes Field ANGB","KS","Shawnee","Topeka",""],["Rosecrans ANGB","MO","Buchanan","St. Joseph",""],["Ebbing ANGB","AR","Sebastian","Fort Smith",""],["Tulsa ANGB","OK","Tulsa","",""],["Will Rogers ANGB","OK","Oklahoma","","Oklahoma City, OK"],["Ellington Field JRB","TX","Harris","","Houston, TX"],["NAS JRB Fort Worth","TX","Tarrant","Carswell","Arlington / Fort Worth / Grapevine, TX"],["Hector Field ANGB","ND","Cass","Fargo",""],["Joe Foss Field ANGB","SD","Minnehaha","Sioux Falls",""],["Great Falls ANGB","MT","Cascade","",""],["Gowen Field","ID","Ada","Boise","Boise, ID"],["Cheyenne ANGB","WY","Laramie","",""],["Roland R. Wright ANGB","UT","Salt Lake","Salt Lake City ANGB","Salt Lake City, UT"],["Kingsley Field","OR","Klamath","Klamath Falls",""],["Portland ANGB","OR","Multnomah","","Portland, OR"],["Camp Murray","WA","Pierce","","Tacoma, WA"],["Reno ANGB","NV","Washoe","May ANGB","Incline Village / Reno / Sparks, NV"],["Fresno ANGB","CA","Fresno","","Fresno, CA"],["Moffett Field","CA","Santa Clara","Moffett ANGB","Sunnyvale / Palo Alto / San Jose, CA"],["Channel Islands ANGS","CA","Ventura","","Los Angeles, CA"],["Morris ANGB","AZ","Pima","Tucson ANGB","Tucson, AZ"],["Goldwater ANGB","AZ","Maricopa","Phoenix Sky Harbor","Phoenix / Scottsdale, AZ"],["McLaughlin ANGB","WV","Kanawha","Charleston WV","Charleston, WV"],["Shepherd Field ANGB","WV","Berkeley","Martinsburg",""],["Alpena CRTC","MI","Alpena","",""],["Battle Creek ANGB","MI","Calhoun","",""],["Hulman Field","IN","Vigo","Terre Haute",""],["Camp Atterbury","IN","Johnson","",""],["Fort Bragg","NC","Cumberland","Fort Liberty","Fayetteville, NC"],["Fort Campbell","KY","Christian","",""],["Fort Hood","TX","Bell","Fort Cavazos",""],["Fort Bliss","TX","El Paso","",""],["Fort Carson","CO","El Paso","","Colorado Springs, CO"],["Fort Stewart","GA","Liberty","",""],["Hunter Army Airfield","GA","Chatham","","Savannah, GA"],["Fort Benning","GA","Muscogee","Fort Moore",""],["Fort Gordon","GA","Richmond","Fort Eisenhower","Augusta, GA"],["Fort Jackson","SC","Richland","","Columbia, SC"],["Fort Knox","KY","Hardin","",""],["Fort Leavenworth","KS","Leavenworth","","Kansas City / Overland Park, KS"],["Fort Riley","KS","Geary","",""],["Fort Sill","OK","Comanche","",""],["Fort Leonard Wood","MO","Pulaski","",""],["Fort Polk","LA","Vernon","Fort Johnson",""],["Fort Rucker","AL","Dale","Fort Novosel",""],["Redstone Arsenal","AL","Madison","","Huntsville, AL"],["Fort Drum","NY","Jefferson","",""],["West Point","NY","Orange","USMA","West Point, NY"],["Fort Hamilton","NY","Kings","","New York City, NY"],["Fort Meade","MD","Anne Arundel","Fort George G. Meade","Annapolis, MD"],["Aberdeen Proving Ground","MD","Harford","APG","Aberdeen / Bel Air / Belcamp, MD"],["Fort Detrick","MD","Frederick","",""],["Fort Belvoir","VA","Fairfax","","District of Columbia, VA"],["Joint Base Myer-Henderson Hall","VA","Arlington","Fort Myer","District of Columbia, VA"],["Fort Lee","VA","Prince George","Fort Gregg-Adams",""],["Fort A.P. Hill","VA","Caroline","Fort Walker",""],["Fort Pickett","VA","Nottoway","Fort Barfoot",""],["Fort Huachuca","AZ","Cochise","",""],["Yuma Proving Ground","AZ","Yuma","",""],["Fort Irwin","CA","San Bernardino","NTC","Barstow / Ontario / Victorville, CA"],["Presidio of Monterey","CA","Monterey","DLI","Monterey, CA"],["Fort Hunter Liggett","CA","Monterey","","Monterey, CA"],["Camp Roberts","CA","San Luis Obispo","","San Luis Obispo, CA"],["White Sands Missile Range","NM","Dona Ana","WSMR",""],["Dugway Proving Ground","UT","Tooele","","Salt Lake City, UT"],["Fort McCoy","WI","Monroe","",""],["Picatinny Arsenal","NJ","Morris","","Parsippany, NJ"],["Carlisle Barracks","PA","Cumberland","Army War College",""],["Fort Indiantown Gap","PA","Lebanon","",""],["Tobyhanna Army Depot","PA","Monroe","",""],["Letterkenny Army Depot","PA","Franklin","",""],["Rock Island Arsenal","IL","Rock Island","",""],["Camp Shelby","MS","Forrest","",""],["Camp Ripley","MN","Morrison","",""],["Camp Grayling","MI","Crawford","",""],["Camp Dodge","IA","Polk","","Des Moines, IA"],["Camp Blanding","FL","Clay","",""],["Anniston Army Depot","AL","Calhoun","",""],["Red River Army Depot","TX","Bowie","",""],["Corpus Christi Army Depot","TX","Nueces","",""],["Naval Station Norfolk","VA","Norfolk","NAVSTA Norfolk",""],["Naval Air Station Oceana","VA","Virginia Beach","NAS Oceana Dam Neck","Virginia Beach, VA"],["Joint Expeditionary Base Little Creek-Fort Story","VA","Virginia Beach","JEB Little Creek","Virginia Beach, VA"],["Naval Weapons Station Yorktown","VA","York","","Williamsburg / York, VA"],["Norfolk Naval Shipyard","VA","Portsmouth","",""],["NSA Hampton Roads","VA","Norfolk","",""],["Naval Station Mayport","FL","Duval","",""],["NAS Jacksonville","FL","Duval","",""],["NAS Pensacola","FL","Escambia","Corry Station","Pensacola, FL"],["NAS Whiting Field","FL","Santa Rosa","","Gulf Breeze, FL"],["NAS Key West","FL","Monroe","","Key West, FL"],["NSA Panama City","FL","Bay","","Panama City, FL"],["Naval Submarine Base Kings Bay","GA","Camden","",""],["NAS Patuxent River","MD","St. Mary's","Pax River",""],["US Naval Academy","MD","Anne Arundel","USNA Annapolis","Annapolis, MD"],["Walter Reed (NSA Bethesda)","MD","Montgomery","Walter Reed National Military Medical Center","District of Columbia, MD"],["Naval Station Newport","RI","Newport","","Jamestown / Middletown / Newport, RI"],["Naval Submarine Base New London","CT","New London","Groton","New London / Groton, CT"],["Naval Station Great Lakes","IL","Lake","","Chicago, IL"],["NAS Corpus Christi","TX","Nueces","",""],["NAS Kingsville","TX","Kleberg","",""],["NAS Meridian","MS","Lauderdale","",""],["NCBC Gulfport","MS","Harrison","Seabee",""],["Naval Base San Diego","CA","San Diego","32nd Street","San Diego, CA"],["NAS North Island","CA","San Diego","Coronado","San Diego, CA"],["Naval Amphibious Base Coronado","CA","San Diego","","San Diego, CA"],["Naval Base Point Loma","CA","San Diego","","San Diego, CA"],["MCAS Miramar","CA","San Diego","","San Diego, CA"],["Camp Pendleton","CA","San Diego","MCB Camp Pendleton","San Diego, CA"],["MCRD San Diego","CA","San Diego","","San Diego, CA"],["NAS Lemoore","CA","Kings","",""],["NAWS China Lake","CA","NAWS China Lake","","Death Valley, CA"],["Naval Base Ventura County","CA","Ventura","Point Mugu Port Hueneme","Los Angeles, CA"],["Naval Postgraduate School","CA","Monterey","NPS","Monterey, CA"],["NAS Whidbey Island","WA","Island","",""],["Naval Base Kitsap","WA","Kitsap","Bremerton Bangor",""],["Naval Station Everett","WA","Snohomish","","Everett / Lynnwood, WA"],["NAS Fallon","NV","Churchill","",""],["MCAS Yuma","AZ","Yuma","",""],["MCAGCC Twentynine Palms","CA","San Bernardino","29 Palms","Barstow / Ontario / Victorville, CA"],["MCLB Barstow","CA","San Bernardino","","Barstow / Ontario / Victorville, CA"],["Camp Lejeune","NC","Onslow","MCB Camp Lejeune",""],["MCAS New River","NC","Onslow","",""],["MCAS Cherry Point","NC","Craven","",""],["MCAS Beaufort","SC","Beaufort","","Hilton Head, SC"],["MCRD Parris Island","SC","Beaufort","","Hilton Head, SC"],["MCB Quantico","VA","Prince William","Quantico",""],["MCLB Albany","GA","Dougherty","",""],["NAS JRB New Orleans","LA","Plaquemines","Belle Chasse",""],["NSA Mid-South","TN","Shelby","Millington","Memphis, TN"],["NSA Crane","IN","Martin","",""],["Portsmouth Naval Shipyard","ME","York","Kittery","Kennebunk / Kittery / Sanford, ME"]];
+const INSTL=INST_D.map(([n,st,co,al,g])=>{const t=g?LOCS.find(l=>l.k==='gsa'&&l.name===g):LOCS[0];
+  return{base:1,i:t.i,k:'base',name:n+', '+st,sub:'Rate area: '+(g?t.name:'Standard CONUS rate')+(/AFB|China Lake/.test(co)?'':' ('+co+' County)'),hay:(n+' '+st+' '+co+' '+al+' '+(g||'standard conus')+' base installation military').toLowerCase()}});
 const md=d=>(d.getMonth()+1)*100+d.getDate(),mdp=s=>{const[m,dd]=s.split('/').map(Number);return m*100+dd};
 function rateOn(loc,date){
   if(loc.k==='gsa')return{lod:loc.lod[date.getMonth()],mie:loc.mie,src:'GSA FY'+GSA_FY};
   if(loc.k==='dos'||loc.k==='dod'){const x=md(date),s=loc.seasons.find(s=>{const b=mdp(s.b),e=mdp(s.e);return b<=e?x>=b&&x<=e:x>=b||x<=e})||loc.seasons[0];return{lod:s.lod,mie:s.mie,fn:s.fn,eff:s.eff,meal:s.meal,prop:s.prop,inc:s.inc,src:(loc.k==='dod'?'DoD':'State Dept')+', effective '+s.eff}}
   return null;
 }
+/* edit distance, capped: used so a typo like "Rammstein" still finds Ramstein */
+function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;let p=Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){const c=[i];let m=i;for(let j=1;j<=b.length;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));m=Math.min(m,c[j])}if(m>max)return max+1;p=c}return p[b.length]}
+const ALLLOC=()=>LOCS.concat(INSTL);
 function locSearch(q){
   const t=q.trim().toLowerCase().split(/[\s,]+/).filter(Boolean);if(!t.length)return LOCS.slice(0,1).concat(LOCS.filter(l=>l.k==='man'));
-  const hits=LOCS.filter(l=>t.every(w=>l.hay.includes(w)));
-  const sc=l=>(l.name.toLowerCase().startsWith(t[0])?0:1)+(l.k==='man'?5:0);
+  const A=ALLLOC();let hits=A.filter(l=>t.every(w=>l.hay.includes(w))),fz=false;
+  if(!hits.length){fz=true;const near=(w,l)=>{if(l.hay.includes(w))return true;if(w.length<4)return false;const mx=w.length>=7?2:1;return (l.words=l.words||l.hay.split(/[^a-z0-9]+/).filter(Boolean)).some(x=>lev(w,x,mx)<=mx||(x.length>w.length&&lev(w,x.slice(0,w.length),mx)<=mx))};
+    hits=A.filter(l=>t.every(w=>near(w,l)))}
+  const sc=l=>(l.name.toLowerCase().startsWith(t[0])?0:1)+(l.base?0:0.5)+(l.k==='man'?5:0);
   hits.sort((a,b)=>sc(a)-sc(b)||a.name.localeCompare(b.name));
   return hits.slice(0,60);
 }
-let PD={li:0,nights:3,act:'',bk:0,ln:0,dn:0,md:'',start:'',total:0,manual:false,lod:'',mie:'',q:''};
+let PD={base:'',li:0,nights:3,act:'',md:'',start:'',total:0,manual:false,lod:'',mie:'',q:'',ob:false,obl:'',mo:'loc',mdays:''};
+/* JTR chapter 2 rules for lodging and meals.
+   Lodging: on base, government quarters are paid at their actual cost instead of the locality lodging rate.
+   Meals, for each full TDY day (first and last travel days are always 75% of the locality M&IE):
+     no meals available, or available but not directed  -> locality M&IE
+     all 3 available and directed in a government dining facility (with government quarters or ILP lodging) -> Government meal rate (GMR) + incidentals
+     1 or 2 available and directed, or 1 or 2 provided at government cost (e.g. in a conference fee) -> proportional meal rate (PMR) + incidentals
+       PMR = (locality meal rate + GMR) / 2, rounded up to the next dollar. DoD overseas locations publish their own PMR.
+     all 3 provided at no cost, or essential unit messing -> incidentals only */
+const GMR=18.00,GMR_YR=2026;
+const MOPT=[['loc','None available, or available but not directed'],['gmr','All 3 available and directed (dining facility)'],['pmr','1 or 2 available and directed, or provided'],['ie','All 3 provided at no cost, or essential unit messing']];
+function mealDay(loc,r){/* per-day M&IE for a full day under PD.mo, or null when it can't be worked out */
+  if(PD.mo==='loc')return {v:r.mie,how:'loc'};
+  let ie=null,meal=null;
+  if(loc.k==='gsa'||loc.k==='man'){const x=GSA_MIE.find(g=>g.total===+r.mie);if(x){ie=x.incidental;meal=r.mie-ie}else if(loc.k==='gsa'){ie=5;meal=r.mie-5}}
+  else if(loc.k==='dod'){ie=r.inc;meal=r.meal}
+  if(ie==null||meal==null)return null;
+  if(PD.mo==='ie')return {v:ie,how:'ie',ie};
+  if(PD.mo==='gmr')return {v:GMR+ie,how:'gmr',ie};
+  if(loc.k==='dod'&&r.prop)return {v:r.prop+ie,how:'pmr',ie,pmr:r.prop};
+  const pmr=Math.ceil((meal+GMR)/2-1e-9);return {v:pmr+ie,how:'pmr',ie,pmr};
+}
 const pdLoc=()=>LOCS[PD.li]||LOCS[0];
 const pdStart=()=>PD.start?pd(PD.start):today();
 function pdOut(){
   const el=$('#pdout');if(!el)return;
   const loc=pdLoc(),n=Math.max(0,Math.floor(+PD.nights)||0),days=n+1,s0=pdStart(),man=PD.manual||loc.k==='man';
-  const r0=man?null:rateOn(loc,s0);
-  let lod=0,mie0=0,lodMin=1e9,lodMax=0,mieSet=new Set(),warn=[];
+  const r0=man?null:rateOn(loc,s0),full=Math.max(0,days-2),md=PD.mdays===''?full:Math.max(0,Math.min(full,Math.floor(+PD.mdays)||0));
+  let lod=0,mie0=0,lodMin=1e9,lodMax=0,mieSet=new Set(),warn=[],gd=0,gv=null,bad=false,locFull=0,endV=0;
   for(let i=0;i<days;i++){const dt=addDays(s0,i),r=man?{lod:+PD.lod||0,mie:+PD.mie||0}:rateOn(loc,dt);
-    if(i<n){const cap=r.lod,a=PD.act===''?cap:Math.min(+PD.act||0,cap);lod+=a;lodMin=Math.min(lodMin,a);lodMax=Math.max(lodMax,a)}
-    const f=(i===0||i===days-1)?.75:1;mie0+=r.mie*f;mieSet.add(r.mie)}
-  const mieStart=man?(+PD.mie||0):r0.mie,b=loc.k==='gsa'&&!man?MB[mieStart]:(MB[mieStart]&&loc.k==='man'?MB[mieStart]:null);
-  const cnt=(+PD.bk||0)+(+PD.ln||0)+(+PD.dn||0);
-  const ded=(b?(+PD.bk||0)*b[0]+(+PD.ln||0)*b[1]+(+PD.dn||0)*b[2]:0)+(+PD.md||0);
-  const mie=Math.max(days*5,mie0-ded);PD.total=lod+mie;
+    if(i<n){const cap=r.lod,a=PD.ob?(+PD.obl||0):PD.act===''?cap:Math.min(+PD.act||0,cap);lod+=a;lodMin=Math.min(lodMin,a);lodMax=Math.max(lodMax,a)}
+    const end=i===0||i===days-1;mieSet.add(r.mie);
+    if(end){mie0+=r.mie*.75;endV+=r.mie*.75;continue}
+    if(PD.mo!=='loc'&&gd<md){const o=mealDay(loc,r);if(o){mie0+=o.v;gd++;gv=o;continue}bad=true}
+    mie0+=r.mie;locFull++}
+  const mieStart=man?(+PD.mie||0):r0.mie,ded=+PD.md||0,mie=Math.max(0,mie0-ded);PD.total=lod+mie;
+  if(PD.ob&&n&&PD.obl==='')warn.push('Enter the on-base lodging cost per night. Government quarters are paid at what they actually cost, not the locality lodging rate.');
+  if(PD.mo==='gmr'&&!PD.ob)warn.push('The Government meal rate applies only when you’re in government quarters (or ILP lodging) on the installation and your orders direct the dining facility. If meals are available but your orders don’t direct them, pick “None available, or available but not directed”.');
+  if(PD.mo!=='loc'&&!full)warn.push('Meal rules apply only to full days between your first and last travel days, so this trip has none.');
+  if(bad)warn.push(loc.k==='dos'?'Government meal rates can’t be worked out for State Department rates. Find this location in the DoD table (overseas military locations), or enter a dollar deduction.':'The meal rate couldn’t be worked out for this M&amp;IE rate, so the locality rate is used.');
   if(!man&&loc.k==='gsa'){const fy=fyOf(s0);if(fy!==GSA_FY)warn.push(`These are FY${GSA_FY} GSA rates (Oct 1, ${GSA_FY-1} to Sep 30, ${GSA_FY}). Your start date is in FY${fy}, so check the current rate.`)}
   if(!man&&loc.k==='dod'&&r0.fn)warn.push(`DoD footnote ${esc(r0.fn)}: ${DOD_FN[r0.fn]?esc(DOD_FN[r0.fn]):'not included in the rate file. Check it on the DoD per diem lookup.'}`);
   if(!man&&loc.k==='dos'){if(r0.fn)warn.push(`The State Department lists a footnote for this post${r0.lod===0?' and a $0 lodging rate (usually government quarters or lodging provided)':''}. Read it on the State Department site before relying on this estimate.`)}
-  if(cnt&&!b)warn.push(loc.k==='dos'||loc.k==='dod'?loc.k==='dod'?`Meal counts can’t be priced automatically for DoD rates. If government meals are available, the JTR proportional meal rate here is ${money(r0.prop)} a day plus ${money(r0.inc)} incidentals. Enter any deduction in dollars instead.`:'Meal counts can’t be priced automatically for foreign rates. Enter the meal deduction in dollars from the State Department breakdown instead.':'Meal counts only work for the $68 to $92 M&amp;IE tiers. Use the dollar deduction box.');
   const nm=n?(lodMin===lodMax?`${n} night(s) at ${money(lodMin)}`:`${n} night(s), ${money(lodMin)} to ${money(lodMax)} a night (rate changes during the trip)`):'0 nights';
-  el.innerHTML=`<div class='tip ok'><b>${money(PD.total)}</b> estimated<br>Lodging: ${nm} = ${money(lod)}<br>M&amp;IE: ${days} day(s)${mieSet.size>1?' (rate changes during the trip)':` at ${money(mieStart)}`}, first and last at 75% = ${money(mie0)}${ded?`, less ${money(ded)} for meals provided`:''}<br>M&amp;IE total: ${money(mie)}</div>${warn.map(w=>`<p class='mute' style='color:var(--warn)'>${w}</p>`).join('')}`;
+  const gTxt=gd&&gv?(gv.how==='gmr'?`${gd} day(s) at the Government meal rate ${money(GMR)} + ${money(gv.ie)} incidentals = ${money(gv.v)}/day`:gv.how==='pmr'?`${gd} day(s) at the proportional meal rate ${money(gv.pmr)} + ${money(gv.ie)} incidentals = ${money(gv.v)}/day`:`${gd} day(s) at incidentals only, ${money(gv.v)}/day`):'';
+  const parts=[days>1?`first and last day at 75% = ${money(endV)}`:`1 day at 75% = ${money(endV)}`];if(gTxt)parts.push(gTxt);if(locFull)parts.push(`${locFull} day(s) at the locality rate${mieSet.size>1?' (rate changes during the trip)':' '+money(mieStart)}`);
+  el.innerHTML=`<div class='tip ok'><b>${money(PD.total)}</b> estimated${PD.ob?' (on base)':''}<br>Lodging: ${PD.ob?(n?`${n} night(s) in government quarters at ${money(+PD.obl||0)}`:'0 nights'):nm} = ${money(lod)}<br>M&amp;IE: ${parts.join('; ')} = ${money(mie0)}${ded?`, less ${money(ded)} other deduction`:''}<br>M&amp;IE total: ${money(mie)}</div>${warn.map(w=>`<p class='mute' style='color:var(--warn)'>${w}</p>`).join('')}`;
   pdCard();
 }
 function pdCard(){
@@ -986,29 +1029,35 @@ function pdCard(){
   if(loc.k==='gsa'){const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],v=new Set(loc.lod);
     det=v.size>1?`<div class='tbl'><table class='mini'><tr>${[9,10,11,0,1,2,3,4,5,6,7,8].map(i=>`<th>${mo[i]}</th>`).join('')}</tr><tr>${[9,10,11,0,1,2,3,4,5,6,7,8].map(i=>`<td${i===s0.getMonth()?" class='on'":''}>$${loc.lod[i]}</td>`).join('')}</tr></table></div>`:''}
   else if(loc.seasons.length>1)det=`<div class='tbl'><table class='mini'><tr><th>Season</th><th>Lodging</th><th>M&amp;IE</th></tr>${loc.seasons.map(s=>`<tr><td>${s.b} to ${s.e}</td><td>$${s.lod}</td><td>$${s.mie}</td></tr>`).join('')}</table></div>`;
-  el.innerHTML=`<div><b>${esc(loc.name)}</b> <span class='tag ${loc.k==='gsa'?'ok':loc.k==='dod'?'plan':'warn'}'>${loc.k==='gsa'?'GSA FY'+GSA_FY:loc.k==='dod'?'DoD':'State Dept'}</span>${loc.sub?`<div class='mute'>${esc(loc.sub)}</div>`:''}<div class='mute'>On ${fmt(s0)}: lodging ${money(r.lod)}, M&amp;IE ${money(r.mie)}${loc.k==='dos'||loc.k==='dod'?` · effective ${esc(r.eff)}`:''}${loc.k==='dod'?` · meals ${money(r.meal)} + incidentals ${money(r.inc)}`:''}${PD.manual?' · <b>you’ve overridden these below</b> <button class="btn ghost sm" id="pdreset">Use published rates</button>':''}</div>${det}</div>`;
+  el.innerHTML=`${PD.base?`<div class='mute' style='margin-bottom:2px'>${esc(PD.base)} uses this rate area:</div>`:''}<div><b>${esc(loc.name)}</b> <span class='tag ${loc.k==='gsa'?'ok':loc.k==='dod'?'plan':'warn'}'>${loc.k==='gsa'?'GSA FY'+GSA_FY:loc.k==='dod'?'DoD':'State Dept'}</span>${loc.sub?`<div class='mute'>${esc(loc.sub)}</div>`:''}<div class='mute'>On ${fmt(s0)}: lodging ${money(r.lod)}, M&amp;IE ${money(r.mie)}${loc.k==='dos'||loc.k==='dod'?` · effective ${esc(r.eff)}`:''}${loc.k==='dod'?` · meals ${money(r.meal)} + incidentals ${money(r.inc)}`:''}${PD.manual?' · <b>you’ve overridden these below</b> <button class="btn ghost sm" id="pdreset">Use published rates</button>':''}</div>${det}</div>`;
   const rb=$('#pdreset');if(rb)rb.onclick=()=>{PD.manual=false;pdFill();pdOut()};
 }
 function pdFill(){const loc=pdLoc();if(loc.k==='man'||PD.manual)return;const r=rateOn(loc,pdStart());PD.lod=r.lod;PD.mie=r.mie;const a=$('#pdlod'),b=$('#pdmie');if(a)a.value=r.lod;if(b)b.value=r.mie}
 function pdPanel(){
   const loc=pdLoc();
   return `<div class='panel'><h2>Per diem calculator</h2>
-  <p class='mute' style='margin:0 0 10px'>Search all ${LOCS.filter(l=>l.k==='gsa').length} GSA continental US locations (FY${GSA_FY}), ${LOCS.filter(l=>l.k==='dod'&&l.nf).length} DoD locations in Alaska, Hawaii and US territories, ${LOCS.filter(l=>l.k==='dos').length} State Department foreign posts, and ${LOCS.filter(l=>l.k==='dod'&&!l.nf).length} overseas military locations from the DoD table. Rates follow your travel dates, including monthly and seasonal changes.</p>
+  <p class='mute' style='margin:0 0 10px'>Search ${INSTL.length} stateside military installations (each uses the GSA rate for its county), all ${LOCS.filter(l=>l.k==='gsa').length} GSA continental US locations (FY${GSA_FY}), ${LOCS.filter(l=>l.k==='dod'&&l.nf).length} DoD locations in Alaska, Hawaii and US territories, ${LOCS.filter(l=>l.k==='dos').length} State Department foreign posts, and ${LOCS.filter(l=>l.k==='dod'&&!l.nf).length} overseas military locations from the DoD table. Rates follow your travel dates, including monthly and seasonal changes.</p>
   <div class='row'>
-  <div style='flex:3 1 260px;position:relative'><label for='pdq'>Location: city, county, post or country</label><input id='pdq' autocomplete='off' role='combobox' aria-expanded='false' aria-controls='pdres' value='${esc(PD.q||loc.name)}' placeholder='e.g. San Antonio, Honolulu, Ramstein, Japan'><div id='pdres' class='pdres' role='listbox' hidden></div></div>
+  <div style='flex:3 1 260px;position:relative'><label for='pdq'>Location: city, county, post or country</label><input id='pdq' autocomplete='off' role='combobox' aria-expanded='false' aria-controls='pdres' value='${esc(PD.q||PD.base||loc.name)}' placeholder='e.g. Travis AFB, San Antonio, Ramstein, Japan'><div id='pdres' class='pdres' role='listbox' hidden></div></div>
   <div><label for='pdst'>Start date</label><input type='date' id='pdst' value='${PD.start||iso(today())}'></div>
   <div><label for='pdn'>Nights</label><input type='number' id='pdn' min='0' value='${PD.nights}'></div></div>
   <div id='pdsel' class='pdsel'></div>
+  <div class='row' style='margin-top:10px;align-items:flex-end'>
+  <div style='flex:0 1 auto'><label style='display:flex;gap:8px;align-items:center;color:var(--ink);font-size:14px;margin:0 0 10px'><input type='checkbox' id='pdob' style='width:auto;margin:0' ${PD.ob?'checked':''}><b>On base</b> (government quarters)</label></div>
+  ${PD.ob?`<div><label for='pdobl'>On-base lodging cost ($/night)</label><input type='number' id='pdobl' min='0' step='0.01' value='${esc(PD.obl)}' placeholder='From billeting'></div>`:''}</div>
+  ${PD.ob?`<p class='mute' style='margin:6px 0 0'>On base, lodging is the actual government quarters cost instead of the locality maximum. If quarters are available and you stay off base anyway, you’re paid only what the quarters would have cost unless you have a non-availability number.</p>`:''}
+  <div class='row' style='margin-top:10px;align-items:flex-end'>
+  <div style='flex:3 1 300px'><label for='pdmo'>Meals on full TDY days (check your orders)</label><select id='pdmo'>${MOPT.map(([k,t])=>`<option value='${k}' ${PD.mo===k?'selected':''}>${t}</option>`).join('')}</select></div>
+  ${PD.mo!=='loc'?`<div style='flex:1 1 140px'><label for='pdmdays'>Days it applies</label><input type='number' id='pdmdays' min='0' value='${esc(PD.mdays)}' placeholder='All full days'></div>`:''}</div>
+  <details class='mute' style='margin-top:6px'><summary style='cursor:pointer;color:var(--acc)'>How meals change per diem (JTR)</summary><p style='margin:6px 0 0'>Your orders say whether government meals are “available and directed”. <b>Available</b> means a government dining facility can feed you; <b>directed</b> means your orders tell you to use it. Only service members can be directed. Meals that are available but not directed don’t reduce per diem. For each full day between your first and last travel days: no meals available or directed pays the locality M&amp;IE; all three available and directed (with government quarters or ILP lodging) pays the Government meal rate, ${money(GMR)} for ${GMR_YR}, plus incidentals; one or two available and directed, or one or two provided at government cost such as in a conference fee, pays the proportional meal rate, which is the locality meal rate plus the GMR divided by 2 and rounded up, plus incidentals; all three provided at no cost, or essential unit messing, pays incidentals only. Travel days are always 75% of the locality M&amp;IE. If the dining facility turns out not to be open for a meal you were directed to eat there, your approving official can switch that day to the proportional rate.</p></details>
   <div class='row' style='margin-top:10px'>
   <div><label for='pdlod'>Lodging max ($/night)</label><input type='number' id='pdlod' min='0' value='${PD.lod}'></div>
   <div><label for='pdmie'>M&amp;IE ($/day)</label><input type='number' id='pdmie' min='0' value='${PD.mie}'></div>
-  <div><label for='pdact'>Actual lodging ($/night)</label><input type='number' id='pdact' min='0' placeholder='Blank = max' value='${PD.act}'></div></div>
+  ${PD.ob?'':`<div><label for='pdact'>Actual lodging ($/night)</label><input type='number' id='pdact' min='0' placeholder='Blank = max' value='${PD.act}'></div>`}</div>
   <div class='row' style='margin-top:10px'>
-  <div><label for='pdbk'>Breakfasts provided</label><input type='number' id='pdbk' min='0' value='${PD.bk}'></div>
-  <div><label for='pdln'>Lunches provided</label><input type='number' id='pdln' min='0' value='${PD.ln}'></div>
-  <div><label for='pddn'>Dinners provided</label><input type='number' id='pddn' min='0' value='${PD.dn}'></div>
-  <div><label for='pdmd'>Other meal deduction ($)</label><input type='number' id='pdmd' min='0' placeholder='Foreign posts' value='${PD.md}'></div>
-  <div style='flex:0 0 auto'><button class='btn' id='pdadd'>Add as draft voucher</button></div></div>
+  <div style='flex:0 1 220px'><label for='pdmd'>Other deduction ($)</label><input type='number' id='pdmd' min='0' placeholder='Optional' value='${PD.md}'></div>
+  </div>
+  <div class='row' style='margin-top:10px'><div style='flex:0 0 auto'><button class='btn' id='pdadd'>Add as draft voucher</button></div></div>
   <div id='pdout' style='margin-top:10px'></div>
   <p class='mute'>Rates captured ${esc(RATES_META.captured)}: GSA FY${GSA_FY} (October 1, ${GSA_FY-1} to September 30, ${GSA_FY}) and State Department foreign rates as published that day. DoD rates for Alaska, Hawaii, US territories and overseas military locations are from the DoD table effective ${esc(DOD_EFF)}. State Department and DoD rates can change twice a month, so confirm before you travel. Lodging tax, transportation and mileage are claimed separately. Official lookups: <a href='https://www.gsa.gov/travel/plan-book/per-diem-rates' target='_blank' rel='noopener'>GSA</a>, <a href='https://www.travel.dod.mil/Travel-Transportation-Rates/Per-Diem/Per-Diem-Rate-Lookup/' target='_blank' rel='noopener'>DoD</a>, <a href='https://allowances.state.gov/web920/per_diem.asp' target='_blank' rel='noopener'>State Department</a>.</p></div>`;
 }
@@ -1016,18 +1065,19 @@ function pdBind(){
   const q=$('#pdq');if(!q)return;const box=$('#pdres');let hits=[],hi=-1;
   if(!PD.manual&&pdLoc().k!=='man'){const r=rateOn(pdLoc(),pdStart());PD.lod=r.lod;PD.mie=r.mie;$('#pdlod').value=r.lod;$('#pdmie').value=r.mie}
   const show=()=>{hits=locSearch(q.value);hi=hits.length?0:-1;
-    box.innerHTML=hits.length?hits.map((l,i)=>`<div role='option' id='pdo${i}' data-li='${l.i}' class='${i===hi?'hi':''}' aria-selected='${i===hi}'><span>${esc(l.name)}</span><span class='src ${l.k}'>${l.k==='gsa'?'GSA':l.k==='dos'?'State':l.k==='dod'?'DoD':'Manual'}</span>${l.sub?`<small>${esc(l.sub)}</small>`:''}</div>`).join(''):`<div class='none'>No match. Try a nearby city, the county, or the country name, or pick “Other location”.</div>`;
+    box.innerHTML=hits.length?hits.map((l,i)=>`<div role='option' id='pdo${i}' data-li='${l.i}' data-base='${l.base?esc(l.name):''}' class='${i===hi?'hi':''}' aria-selected='${i===hi}'><span>${esc(l.name)}</span><span class='src ${l.k}'>${l.k==='base'?'Base':l.k==='gsa'?'GSA':l.k==='dos'?'State':l.k==='dod'?'DoD':'Manual'}</span>${l.sub?`<small>${esc(l.sub)}</small>`:''}</div>`).join(''):`<div class='none'>No match. Try a nearby city, the county, or the country name, or pick “Other location”.</div>`;
     box.hidden=false;q.setAttribute('aria-expanded','true');
-    box.querySelectorAll('[data-li]').forEach(o=>o.onpointerdown=e=>{e.preventDefault();pick(+o.dataset.li)})};
+    box.querySelectorAll('[data-li]').forEach(o=>o.onpointerdown=e=>{e.preventDefault();pick(+o.dataset.li,o.dataset.base)})};
   const hide=()=>{box.hidden=true;q.setAttribute('aria-expanded','false')};
-  const pick=li=>{PD.li=li;PD.manual=false;PD.q='';q.value=LOCS[li].name;hide();if(LOCS[li].k==='man'){PD.lod='';PD.mie='';$('#pdlod').value='';$('#pdmie').value='';$('#pdlod').focus()}else pdFill();pdOut()};
+  const pick=(li,base)=>{PD.li=li;PD.base=base||'';PD.manual=false;PD.q='';q.value=PD.base||LOCS[li].name;hide();if(LOCS[li].k==='man'){PD.lod='';PD.mie='';$('#pdlod').value='';$('#pdmie').value='';$('#pdlod').focus()}else pdFill();pdOut()};
   const mv=d=>{if(!hits.length)return;hi=(hi+d+hits.length)%hits.length;box.querySelectorAll('[role=option]').forEach((o,i)=>{o.classList.toggle('hi',i===hi);o.setAttribute('aria-selected',i===hi)});const o=$('#pdo'+hi);if(o){o.scrollIntoView({block:'nearest'});q.setAttribute('aria-activedescendant','pdo'+hi)}};
-  q.oninput=()=>{PD.q=q.value;show()};q.onfocus=()=>{q.select();show()};q.onblur=()=>setTimeout(()=>{hide();if(PD.q){PD.q='';q.value=pdLoc().name}},150);
-  q.onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();if(box.hidden)show();else mv(1)}else if(e.key==='ArrowUp'){e.preventDefault();mv(-1)}else if(e.key==='Enter'){e.preventDefault();if(hi>=0&&hits[hi])pick(hits[hi].i)}else if(e.key==='Escape'){hide()}};
+  q.oninput=()=>{PD.q=q.value;show()};q.onfocus=()=>{q.select();show()};q.onblur=()=>setTimeout(()=>{hide();if(PD.q){PD.q='';q.value=PD.base||pdLoc().name}},150);
+  q.onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();if(box.hidden)show();else mv(1)}else if(e.key==='ArrowUp'){e.preventDefault();mv(-1)}else if(e.key==='Enter'){e.preventDefault();if(hi>=0&&hits[hi])pick(hits[hi].i,hits[hi].base?hits[hi].name:'')}else if(e.key==='Escape'){hide()}};
   $('#pdst').oninput=()=>{PD.start=$('#pdst').value;pdFill();pdOut()};
-  [['#pdn','nights'],['#pdact','act'],['#pdbk','bk'],['#pdln','ln'],['#pddn','dn'],['#pdmd','md']].forEach(([s,k])=>{const e=$(s);e.oninput=()=>{PD[k]=e.value;pdOut()}});
+  [['#pdn','nights'],['#pdact','act'],['#pdmd','md'],['#pdobl','obl'],['#pdmdays','mdays']].forEach(([s,k])=>{const e=$(s);if(e)e.oninput=()=>{PD[k]=e.value;pdOut()}});
+  $('#pdob').onchange=e=>{PD.ob=e.target.checked;render()};{const m=$('#pdmo');if(m)m.onchange=()=>{PD.mo=m.value;render()}}
   [['#pdlod','lod'],['#pdmie','mie']].forEach(([s,k])=>{const e=$(s);e.oninput=()=>{PD[k]=e.value;if(pdLoc().k!=='man')PD.manual=true;pdOut()}});
-  $('#pdadd').onclick=()=>{pdOut();const n=Math.max(0,Math.floor(+PD.nights)||0),end=iso(addDays(pdStart(),n));S.vouchers.push({date:end,desc:'Per diem: '+pdLoc().name+', '+n+' night(s)',amount:Math.round(PD.total*100)/100,status:'draft',sdate:'',pdate:'',paidAmt:''});save();render()};
+  $('#pdadd').onclick=()=>{pdOut();const n=Math.max(0,Math.floor(+PD.nights)||0),end=iso(addDays(pdStart(),n));S.vouchers.push({date:end,desc:'Per diem: '+(PD.base||pdLoc().name)+', '+n+' night(s)'+(PD.ob?', on base':''),amount:Math.round(PD.total*100)/100,status:'draft',sdate:'',pdate:'',paidAmt:''});save();render()};
   pdOut();
 }
 
@@ -1248,7 +1298,7 @@ function set(){
   <p class="mute" id="bk">Data lives only in this browser, so copy a backup now and then.</p></div>`;
 }
 
-/* ---------- Day editor: right-click / long-press ---------- */
+/* ---------- Day editor: double-click / double-tap a day ---------- */
 /* yearly FTP + GTP authorization: 48 (16 per quarter) or 72 (24 per quarter); half must be flying */
 const TPMAX=()=>S.tpMax===48?48:72,TPQ=()=>TPMAX()/3,TPH=()=>TPMAX()/2;
 const LIM={uta:2,ftp:2,gtp:1},KN={uta:'UTA period',ftp:'FTP',gtp:'GTP'},KL={uta:'UTA period',ftp:'FTP (flying)',gtp:'GTP (ground)'},DAYMAX=2;
@@ -1258,9 +1308,16 @@ const extraUta=D=>S.duty.filter(x=>x.type==='uta'&&!x.slot&&x.date===D).reduce((
 function utaQueue(D){const fy=fyOf(pd(D)),a=[];for(let k=0;k<12;k++){const x=new Date(fy-1,9+k,1);for(let n=1;n<=4;n++)a.push('uta-'+x.getFullYear()+'-'+(x.getMonth()+1)+'-p'+n)}return a}
 const utaReusable=id=>{const x=(S.slots||{})[id];return !!(x&&x.date&&!x.conf&&slotPs(id)==='none')};
 const slotPs=id=>{const d=S.duty.find(x=>x.slot===id);return d?(d.ps||'none'):'none'};
+/* Scheduled UTA weekends (your imported schedule, or the built-in one): each date takes only its own month's periods,
+   P1 and P2 on the first day, P3 and P4 on the second. Rescheduled periods from other months can't go on those dates.
+   FTPs, GTPs and orders aren't affected. */
+function utaWeekends(){const m={},put=st=>{const d=pd(st),mk=d.getFullYear()+'-'+(d.getMonth()+1);if(m[mk])return;m[mk]=st};
+  Object.entries(S.utaSched||{}).forEach(([k,v])=>{if(v)m[k]=v});[...ICS_UTA].sort().filter(x=>!ICS_UTA.has(iso(addDays(pd(x),-1)))).forEach(put);return m}
+function utaFixed(D){for(const[mk,st]of Object.entries(utaWeekends())){const i=D===st?0:D===iso(addDays(pd(st),1))?1:-1;if(i<0)continue;const b='uta-'+mk+'-p';return{ids:i?[b+3,b+4]:[b+1,b+2],mk,day:i+1}}return null}
+const utaFixedName=f=>pd(f.mk.replace(/-(\d)$/,'-0$1')+'-01').toLocaleDateString(undefined,{month:'long',year:'numeric'});
 /* default period = first open one after the latest period marked submitted or paid */
 function utaPlan(D,R){
-  const sl=S.slots||{},q=utaQueue(D),keep=new Set(R.filter(r=>r.k==='uta'&&(r.sel||r.id)).map(r=>r.sel||r.id));
+  const F=utaFixed(D),sl=S.slots||{},q=utaQueue(D).filter(id=>!F||F.ids.includes(id)),keep=new Set(R.filter(r=>r.k==='uta'&&(r.sel||r.id)).map(r=>r.sel||r.id));
   let last=-1;q.forEach((id,i)=>{if(slotPs(id)!=='none')last=i});
   const after=q.slice(last+1).filter(id=>!keep.has(id)),free=id=>!(sl[id]&&sl[id].date)||sl[id].date===D;
   /* in order: open periods, plus not-submitted placeholders on other days (they move here). Periods you saved in the day editor (conf) stay put. */
@@ -1272,9 +1329,10 @@ function utaPlan(D,R){
 }
 /* every UTA period in the date's fiscal year, in order */
 function utaOptions(D,plan,i){
-  const sl=S.slots||{},mine=plan[i],others=new Set(plan.filter((p,j)=>p&&j!==i));
+  const F=utaFixed(D),sl=S.slots||{},mine=plan[i],others=new Set(plan.filter((p,j)=>p&&j!==i));
   const opt=id=>{const u=sl[id]&&sl[id].date&&sl[id].date!==D?sl[id].date:'',ps=slotPs(id),lock=u&&(ps!=='none'||sl[id].conf),taken=others.has(id),dis=(lock||taken)&&id!==mine;
     return `<option value='${id}' ${id===mine?'selected':''} ${dis?'disabled':''}>${utaLbl(id)}${u?' — '+(lock?(ps!=='none'?psName(ps).toLowerCase():'logged')+', '+fmt(u):'not submitted, '+fmt(u)+(id===mine?' (moves here)':'')):taken?' — in use above':''}</option>`};
+  if(F)return (mine?'':`<option value='' selected disabled>${utaLbl(F.ids[0])} and ${utaLbl(F.ids[1])} are both used</option>`)+`<optgroup label='${utaFixedName(F)} UTA weekend, day ${F.day}'>${F.ids.map(opt).join('')}</optgroup>`;
   const q=utaQueue(D),g=[];for(let k=0;k<12;k++){const x=new Date(fyOf(pd(D))-1,9+k,1);g.push(`<optgroup label='${x.toLocaleDateString(undefined,{month:'long',year:'numeric'})}'>${q.slice(k*4,k*4+4).map(opt).join('')}</optgroup>`)}
   return (mine?'':`<option value='' selected disabled>Every period this fiscal year is submitted or paid</option>`)+g.join('');
 }
@@ -1284,11 +1342,15 @@ function edOpen(date,addKind){
   const v=(S.tpd||{})[date];TPK.forEach(([k])=>tpList(v,k).forEach(it=>rows.push({k,rs:it.rs||'',ps:it.ps,note:it.note,sdate:it.sdate,pdate:it.pdate,start:it.start,end:it.end})));
   const back=document.activeElement;
   CAL.sel=date;const d=pd(date);CAL.y=d.getFullYear();CAL.m=d.getMonth();render();
+  rows.forEach((r,i)=>{const t=DTIME[i];if(t&&!r.start&&!r.end){r.start=t[0];r.end=t[1]}});
   ED={date,rows,err:'',dataKey:date,snap:JSON.stringify(rows)};
   document.body.classList.add('lock');
-  if(addKind&&edCanAdd(addKind)){ED.rows.push({k:addKind,rs:RS[addKind][0][0],ps:'none',note:'',start:'',end:''});edRender();const el=$('#est'+(ED.rows.length-1));if(el)el.focus({preventScroll:true})}
+  if(addKind&&edCanAdd(addKind)){ED.rows.push(edNew(addKind));edRender();const el=$('#est'+(ED.rows.length-1));if(el)el.focus({preventScroll:true})}
   else edRender(true);
 }
+/* default times by position on the day: 1st pay status 0800-1200, 2nd 1300-1700 */
+const DTIME=[['08:00','12:00'],['13:00','17:00']];
+function edNew(k){const i=ED.rows.length,t=DTIME[i]||['',''];return{k,rs:RS[k][0][0],ps:'none',note:'',start:t[0],end:t[1]}}
 function edClose(){ED=null;document.body.classList.remove('lock');$('#modal').innerHTML='';}
 function edCount(k){return ED.rows.filter(r=>r.k===k).length+(k==='uta'?extraUta(ED.date):0)}
 function edUsed(){return ED.rows.length+extraUta(ED.date)}
@@ -1334,7 +1396,7 @@ function edRender(focus){
   $('#edx').onclick=edCancel;$('#edc').onclick=edCancel;$('#eds').onclick=edSave;
   m.querySelectorAll('[data-oe]').forEach(b=>b.onclick=()=>{if(JSON.stringify(ED.rows)!==ED.snap)return edErr('Save or cancel your changes first, then open the orders.');oeOpen(+b.dataset.oe,null,null,D)});
   m.querySelectorAll('[data-addo]').forEach(b=>b.onclick=()=>{if(JSON.stringify(ED.rows)!==ED.snap)return edErr('Save or cancel your changes first, then add orders.');oeOpen(null,D,b.dataset.addo,D)});
-  m.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const k=b.dataset.add;if(!edCanAdd(k))return;ED.rows.push({k,rs:RS[k][0][0],ps:'none',note:'',start:'',end:''});ED.err='';edRender();const i=ED.rows.length-1,el=$('#est'+i);if(el)el.focus()});
+  m.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const k=b.dataset.add;if(!edCanAdd(k))return;ED.rows.push(edNew(k));ED.err='';edRender();const i=ED.rows.length-1,el=$('#est'+i);if(el)el.focus()});
   m.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ED.rows.splice(+b.dataset.rm,1);ED.err='';edRender();const f=m.querySelector('[data-add]:not([disabled])')||$('#eds');if(f)f.focus()});
   m.querySelectorAll('[data-eper]').forEach(s=>s.onchange=()=>{const i=+s.dataset.eper;ED.rows[i].sel=s.value;ED.err='';edRender();const el=$('#eper'+i);if(el)el.focus()});
   m.querySelectorAll('[data-ers]').forEach(s=>s.onchange=()=>{ED.rows[+s.dataset.ers].rs=s.value;rsnRefresh()});
@@ -1356,6 +1418,8 @@ function edSave(){
   if(R.length+ex>DAYMAX)return edErr(`A day can hold at most ${DAYMAX} pay statuses. Remove ${R.length+ex-DAYMAX}.`);
   for(const k of ['uta','ftp','gtp'])if(c(k)>LIM[k])return edErr(`Only ${LIM[k]} ${KN[k]}${LIM[k]>1?'s':''} allowed per day.`);
   const plan=utaPlan(D,R);
+  {const F=utaFixed(D);if(F){if(plan.some((p,i)=>R[i].k==='uta'&&p&&!F.ids.includes(p)))return edErr(`${fmt(D)} is day ${F.day} of the ${utaFixedName(F)} UTA weekend, so only ${utaLbl(F.ids[0])} and ${utaLbl(F.ids[1])} can go on it. Periods from other months can\u2019t be moved onto a scheduled UTA weekend.`);
+    if(plan.some((p,i)=>R[i].k==='uta'&&!p))return edErr(`${fmt(D)} is day ${F.day} of the ${utaFixedName(F)} UTA weekend. Only ${utaLbl(F.ids[0])} and ${utaLbl(F.ids[1])} can go on it, and they\u2019re already used.`)}}
   if(plan.some((p,i)=>R[i].k==='uta'&&!p))return edErr(`Every UTA period in FY${fyOf(pd(D))} is already submitted or paid.`);
   {const sl=S.slots||{},u=plan.filter(Boolean);if(new Set(u).size!==u.length)return edErr('Two entries use the same UTA period. Pick a different one.');
    const busy=u.find(id=>sl[id]&&sl[id].date&&sl[id].date!==D&&!utaReusable(id));if(busy)return edErr(`${utaLbl(busy)} is already used on ${fmt(sl[busy].date)}. Pick a different period.`)}
@@ -1377,25 +1441,17 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();edCancel();return}
   if(e.key==='Tab'){const f=[...$('#modal').querySelectorAll('button:not([disabled]),input,select')];if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}
 });
-/* long-press + right-click on calendar days */
-const LP={h:0,x:0,y:0,fired:false,touch:false,el:null};
-function lpClear(){clearTimeout(LP.h);LP.h=0;if(LP.el)LP.el.classList.remove('press');LP.el=null}
+/* double-click (double-tap on a phone) opens a day. One click or tap selects it.
+   Tracked by time because a single click re-renders the calendar, so the browser's own dblclick can't be relied on. */
+const DC={k:'',t:0};
 function bindDays(){
   document.querySelectorAll('[data-cd]').forEach(b=>{
     const k=b.dataset.cd;
-    b.onclick=()=>{if(LP.fired){LP.fired=false;return}CAL.sel=k;const d=pd(k);CAL.y=d.getFullYear();CAL.m=d.getMonth();render()};
-    b.oncontextmenu=e=>{e.preventDefault();lpClear();if(ED)return;LP.fired=LP.touch;edOpen(k)};
-    b.onpointerdown=e=>{LP.touch=e.pointerType!=='mouse';LP.fired=false;if(!LP.touch)return;lpClear();LP.x=e.clientX;LP.y=e.clientY;LP.el=b;
-      b.classList.add('press');
-      LP.h=setTimeout(()=>{lpClear();if(ED)return;LP.fired=true;try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}edOpen(k)},480)};
-    b.onpointermove=e=>{if(LP.h&&(Math.abs(e.clientX-LP.x)>10||Math.abs(e.clientY-LP.y)>10))lpClear()};
-    b.onpointerup=b.onpointercancel=b.onpointerleave=()=>{if(LP.h)lpClear()};
+    b.onclick=()=>{const now=Date.now();
+      if(DC.k===k&&now-DC.t<450){DC.k='';DC.t=0;if(!ED)edOpen(k);return}
+      DC.k=k;DC.t=now;CAL.sel=k;const d=pd(k);CAL.y=d.getFullYear();CAL.m=d.getMonth();render()};
   });
 }
-document.addEventListener('scroll',()=>{if(LP.h)lpClear()},{passive:true,capture:true});
-/* swallow the click that follows a long-press release so it can't hit the dialog */
-document.addEventListener('pointerdown',()=>{LP.fired=false},true);
-document.addEventListener('click',e=>{if(LP.fired){LP.fired=false;e.preventDefault();e.stopPropagation()}},true);
 
 function bind(){
   const q=(s,f)=>{const e=$(s);if(e)e.onclick=f};
