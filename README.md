@@ -1,4 +1,4 @@
-# GuardReserveGuru v6: accounts + Cloudflare database
+# GuardReserveGuru v7: accounts + Cloudflare database
 
 Login is **name/callsign + last 4 of phone**. Each person's data lives in your Cloudflare D1 database and follows them to any device. It still works offline and syncs when back online.
 
@@ -10,15 +10,13 @@ Run these from inside this folder. One command per step.
 npx wrangler login
 ```
 
-## 2. Create the database
+## 2–3. Database and tables (done)
+
+`grg-db` was created on Nov 18, 2026 with all tables from `schema.sql`, and its ID is in `wrangler.toml`. To recreate it from scratch:
 
 ```
 npx wrangler d1 create grg-db
 ```
-
-Copy the `database_id` it prints into `wrangler.toml` (replace `PASTE-YOUR-DATABASE-ID-HERE`).
-
-## 3. Create the tables
 
 ```
 npx wrangler d1 execute grg-db --remote --file=schema.sql
@@ -45,6 +43,10 @@ npx wrangler pages secret put PIN_PEPPER --project-name guardreserveguru
 ```
 
 Redeploy once after setting secrets (repeat the deploy command in step 4).
+
+## Or deploy from GitHub instead of steps 4–5
+
+Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git → pick this repo. Production branch `main`, no build command, build output directory `public`. Cloudflare reads the D1 binding from `wrangler.toml`. Add `PIN_PEPPER` under the project's Settings → Variables and Secrets (type: Secret). Every push to `main` then redeploys.
 
 ## Updating the site later
 
